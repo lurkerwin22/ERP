@@ -8,10 +8,15 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware('guest')->group(function () {
