@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegistredUserController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\SessionController;
@@ -85,4 +86,26 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/categories/{categorie}', [CategorieController::class, 'destroy'])
         ->name('categories.destroy');
+});
+ 
+Route::middleware('auth')->group(function (){
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Management
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/stock', [StockController::class, 'index'])
+        ->name('stock.index');
+
+    Route::get('/products/{product}/stock', [StockController::class, 'movements'])
+        ->name('stock.movements');
+
+    Route::get('/products/{product}/stock/adjust', [StockController::class, 'adjust'])
+        ->name('stock.adjust');
+
+    Route::post('/products/{product}/stock/add', [StockController::class, 'addStock'])
+        ->name('stock.add');
+
+    Route::post('/products/{product}/stock/remove', [StockController::class, 'removeStock'])
+        ->name('stock.remove');
 });

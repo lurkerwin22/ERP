@@ -21,4 +21,8 @@ class Products extends Model
     public function category(){
         return $this->belongsTo(Categorie::class, 'categorie_id');
     }
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class, 'product_id');
+    }
 }
