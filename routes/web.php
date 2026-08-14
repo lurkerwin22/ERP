@@ -7,6 +7,8 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VenteController;
+use App\Http\Controllers\ClientController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -117,25 +119,25 @@ Route::middleware('auth')->group(function (){
     | Clients (Customers)
     |--------------------------------------------------------------------------
     */
-    Route::get('/clients', [\App\Http\Controllers\ClientController::class, 'index'])
+    Route::get('/clients', [ClientController::class, 'index'])
         ->name('clients.index');
 
-    Route::get('/clients/create', [\App\Http\Controllers\ClientController::class, 'create'])
+    Route::get('/clients/create', [ClientController::class, 'create'])
         ->name('clients.create');
 
-    Route::post('/clients', [\App\Http\Controllers\ClientController::class, 'store'])
+    Route::post('/clients', [ClientController::class, 'store'])
         ->name('clients.store');
 
-    Route::get('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'show'])
+    Route::get('/clients/{client}', [ClientController::class, 'show'])
         ->name('clients.show');
 
-    Route::get('/clients/{client}/edit', [\App\Http\Controllers\ClientController::class, 'edit'])
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])
         ->name('clients.edit');
 
-    Route::patch('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'update'])
+    Route::patch('/clients/{client}', [ClientController::class, 'update'])
         ->name('clients.update');
 
-    Route::delete('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'destroy'])
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])
         ->name('clients.destroy');
 });
 
@@ -143,4 +145,5 @@ Route::middleware('auth')->group(function (){
     Route::resource('ventes', VenteController::class);
     Route::patch('/ventes/{vente}/cancel', [VenteController::class, 'cancel'])
         ->name('ventes.cancel');
+    Route::get('ventes/{vente}/invoice', [VenteController::class, 'invoice'])->name('ventes.invoice');
 });

@@ -125,4 +125,11 @@ class VenteController extends Controller
         return redirect()->route('ventes.index')
             ->with('success', "Sale #{$vente->id} cancelled and stock restored successfully.");
     }
+    public function invoice(Vente $vente)
+    {
+        // Load relations for customer and items with product
+        $vente->load(['client', 'ligneVentes.produit']);
+
+        return view('ventes.invoice', compact('vente'));
+    }
 }

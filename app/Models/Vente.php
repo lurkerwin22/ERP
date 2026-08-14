@@ -26,4 +26,9 @@ class Vente extends Model
     {
         return $this->hasMany(LigneVente::class);
     }
+    public function getNumeroFactureAttribute()
+    {
+        $year = $this->created_at ? $this->created_at->format('Y') : date('Y');
+        return 'INV-' . $year . '-' . str_pad($this->id, 5, '0', STR_PAD_LEFT);
+    }
 }
