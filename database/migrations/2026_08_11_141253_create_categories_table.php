@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Categorie;
 
 return new class extends Migration
 {
@@ -12,15 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Categorie::class);
             $table->string('name');
-            $table->string('description');
-            $table->string('url');
-            $table->decimal('prix', 8, 2);
-            $table->integer('stock');
-            $table->integer('seuil_alerte');
+            $table->string('description')->nullable();;
             $table->timestamps();
         });
     }
@@ -30,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('categories');
     }
 };

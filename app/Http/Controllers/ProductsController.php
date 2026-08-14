@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Products;
+use App\Models\Categorie;
+
 use Illuminate\Http\Request;
 
 class ProductsController extends Controller
@@ -13,15 +15,27 @@ class ProductsController extends Controller
     public function index()
     {
         $products = Products::latest()->paginate(10);
-        return view('products.index', ['products' => $products]);
+
+        return view('products.index', [
+            'products' => $products,
+            'categorie' => null,
+        ]);
     }
+
+    
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('products.create');
+        $categorie = null;
+
+        if ($request->has('categorie')) {
+            $categorie = Categorie::findOrFail($request->categorie);
+        }
+
+        return view('products.create', compact('categorie'));
     }
 
     /**
@@ -29,18 +43,20 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        $attributes = $request->validate([
+        $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string', 'max:254'],
-            'url'          => ['required', 'url'],
+            'description'  => ['nullable', 'string'],
+            'url'          => ['nullable', 'url'],
             'prix'         => ['required', 'numeric', 'min:0'],
-            'stock'        => ['required', 'integer', 'min:0'],
-            'seuil_alerte' => ['required', 'integer', 'min:0'],
+            'stock'        => ['required', 'numeric' , 'min:0'],
+            'seuil_alerte' => ['required', 'numeric', 'min:0'],
+            'categorie_id' => ['required', 'exists:categories,id'],
         ]);
 
-        Products::create($attributes);
+        Products::create($validated);
 
-        return redirect('/products');
+        return redirect()->route('products.index')
+            ->with('success', 'Product created successfully.');
     }
 
     /**
@@ -87,4 +103,11 @@ class ProductsController extends Controller
         $product->delete();
         return redirect('/products');
     }
+    public function categorie(Categorie $categorie)
+    {
+        $products = $categorie->products()->latest()->paginate(10);
+
+        return view('products.index', compact('products', 'categorie'));
+    }
+
 }

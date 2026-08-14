@@ -19,6 +19,16 @@
                     <x-forms.input label="Stock" name="stock" type="number" placeholder="0" />
 
                     <x-forms.input label="Seuil d'alerte" name="seuil_alerte" type="number" placeholder="5" />
+                    @if($categorie)
+                        <div class="mb-4">
+                            <span class="text-sm text-gray-500">Category:</span>
+                            <span class="text-sm font-semibold">
+                                {{ $categorie->name }}
+                            </span>
+                        </div>
+
+                        <input type="hidden" name="categorie_id" value="{{ $categorie->id }}">
+                    @endif
                 </div>
 
                 <x-forms.divider />

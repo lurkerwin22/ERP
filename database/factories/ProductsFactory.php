@@ -2,8 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\products;
+use App\Models\Products;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Categorie;
 
 /**
  * @extends Factory<products>
@@ -18,6 +19,7 @@ class ProductsFactory extends Factory
     public function definition(): array
     {
         return [
+            'categorie_id' => Categorie::factory(),
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
             'url' => 'https://picsum.photos/',
