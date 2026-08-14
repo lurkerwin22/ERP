@@ -6,6 +6,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\VenteController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -136,4 +137,10 @@ Route::middleware('auth')->group(function (){
 
     Route::delete('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'destroy'])
         ->name('clients.destroy');
+});
+
+Route::middleware('auth')->group(function (){
+    Route::resource('ventes', VenteController::class);
+    Route::patch('/ventes/{vente}/cancel', [VenteController::class, 'cancel'])
+        ->name('ventes.cancel');
 });
