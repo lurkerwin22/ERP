@@ -56,12 +56,21 @@ class ProductsController extends Controller
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string'],
+            'image'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'url'          => ['nullable', 'url'],
             'prix'         => ['required', 'numeric', 'min:0'],
-            'stock'        => ['required', 'numeric' , 'min:0'],
+            'stock'        => ['required', 'numeric', 'min:0'],
             'seuil_alerte' => ['required', 'numeric', 'min:0'],
             'categorie_id' => ['required', 'exists:categories,id'],
         ]);
+
+        // Handle Image Upload or URL fallback
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('products', 'public');
+            $validated['url'] = $path;
+        }
+
+        unset($validated['image']);
 
         Products::create($validated);
 
@@ -94,15 +103,29 @@ class ProductsController extends Controller
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string', 'max:254'],
-            'url'          => ['required', 'url'],
+            'image'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'url'          => ['nullable', 'string'],
             'prix'         => ['required', 'numeric'],
             'stock'        => ['required', 'numeric'],
             'seuil_alerte' => ['required', 'numeric'],
         ]);
 
+        // Handle New Image Upload
+        if ($request->hasFile('image')) {
+            // Optionally delete old image if it was uploaded locally
+            if ($product->url && !str_starts_with($product->url, 'http')) {
+                Storage::disk('public')->delete($product->url);
+            }
+
+            $path = $request->file('image')->store('products', 'public');
+            $validated['url'] = $path;
+        }
+
+        unset($validated['image']);
+
         $product->update($validated);
 
-        return redirect('/products');
+        return redirect('/products')->with('success', 'Product updated successfully.');
     }
 
     /**

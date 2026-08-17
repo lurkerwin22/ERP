@@ -4,7 +4,11 @@
     <!-- Image / Placeholder -->
     <div class="w-full sm:w-32 h-32 flex-shrink-0 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-center overflow-hidden">
         @if(!empty($product->url))
-            <img src="https://picsum.photos/100" alt="{{ $product->name }}" class="w-full h-full object-cover">
+            <img 
+                src="{{ str_starts_with($product->url, 'http') ? $product->url : asset('storage/' . $product->url) }}" 
+                alt="{{ $product->name }}" 
+                class="w-full h-full object-cover"
+            />
         @else
             <!-- Placeholder Icon matching image mockup -->
             <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,11 +43,11 @@
                     <span class="font-medium">stock:</span> {{ $product->stock ?? 0 }}
                 </div>
                 <div>
-                    <span class="font-medium">seuil d'alerte:</span> {{ $product->seuil_alerte ??  0 }}
+                    <span class="font-medium">seuil d'alerte:</span> {{ $product->seuil_alerte ?? 0 }}
                 </div>
             </div>
 
-            <a href="{{ '/products/'.$product->id.'/edit' }}"
+            <a href="{{ route('products.edit', $product) }}"
                class="px-4 py-1.5 border border-blue-500 text-blue-600 text-sm font-medium rounded hover:bg-blue-50 transition-colors">
                 edit
             </a>
