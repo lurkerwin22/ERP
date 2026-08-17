@@ -20,7 +20,7 @@
 
             <!-- Dashboard -->
             <li>
-                <a href="/dashboard"
+                <a href="/"
                    class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
 
                     <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
