@@ -53,22 +53,28 @@ class DashboardController extends Controller
         });
 
         // 5. Recent Activity (Last 5 Sales)
+        // ✅ Load relationship optionally, but query includes client_nom snapshot
         $recentSales = Vente::with('client')
             ->latest()
             ->take(5)
             ->get();
 
         // 6. Top Selling Products (Aggregated from LigneVente)
-        $topProducts = LigneVente::select('product_id', DB::raw('SUM(quantite) as total_sold'), DB::raw('SUM(sous_total) as total_revenue'))
-            ->with('product')
-            ->groupBy('product_id')
+        // ✅ Group by snapshot `nom_produit` instead of `product_id` so deleted products keep their name and sales history
+        $topProducts = LigneVente::select(
+                'nom_produit', 
+                DB::raw('SUM(quantite) as total_sold'), 
+                DB::raw('SUM(sous_total) as total_revenue')
+            )
+            ->groupBy('nom_produit')
             ->orderByDesc('total_sold')
             ->take(5)
             ->get();
 
         // 7. Low / Out-of-Stock Alert Table
-        $criticalStockProducts = Products::where('quantity', '<=', DB::raw('seuil_alerte'))
-            ->orderBy('quantity', 'asc')
+        // ✅ Fixed column name from 'quantity' to 'stock'
+        $criticalStockProducts = Products::where('stock', '<=', DB::raw('seuil_alerte'))
+            ->orderBy('stock', 'asc')
             ->take(5)
             ->get();
 

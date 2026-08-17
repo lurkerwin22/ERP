@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <!-- 4. Tables Section (Recent Sales & Stock Alerts / Top Products) -->
+        <!-- 4. Tables Section (Recent Sales & Top Products) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- Recent Sales Table -->
@@ -128,8 +128,14 @@
                         <tbody class="divide-y divide-gray-100 text-sm">
                             @forelse($recentSales as $vente)
                                 <tr>
-                                    <td class="py-3 font-semibold text-gray-900">{{ $vente->numero_facture }}</td>
-                                    <td class="py-3 text-gray-600">{{ $vente->client->nom ?? 'Walk-in Customer' }}</td>
+                                    <td class="py-3 font-semibold text-gray-900">#{{ $vente->id }}</td>
+                                    <!-- ✅ FIXED: Checks client_nom snapshot first -->
+                                    <td class="py-3 text-gray-600">
+                                        {{ $vente->client_nom ?? $vente->client?->nom ?? 'Walk-in Customer' }}
+                                        @if(is_null($vente->client_id) && $vente->client_nom && $vente->client_nom !== 'Walk-in Customer')
+                                            <span class="text-[10px] text-gray-400 block">(Deleted)</span>
+                                        @endif
+                                    </td>
                                     <td class="py-3 font-bold text-emerald-600 text-right">{{ number_format($vente->total, 2) }} TND</td>
                                     <td class="py-3 text-right">
                                         <a href="{{ route('ventes.show', $vente) }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-900">Details</a>
@@ -160,7 +166,8 @@
                         <tbody class="divide-y divide-gray-100 text-sm">
                             @forelse($topProducts as $item)
                                 <tr>
-                                    <td class="py-3 font-medium text-gray-900">{{ $item->produit->name ?? 'Deleted Item' }}</td>
+                                    <!-- ✅ FIXED: Reads snapshot product name directly -->
+                                    <td class="py-3 font-medium text-gray-900">{{ $item->nom_produit }}</td>
                                     <td class="py-3 text-center font-bold text-indigo-600">{{ $item->total_sold }}</td>
                                     <td class="py-3 font-semibold text-gray-900 text-right">{{ number_format($item->total_revenue, 2) }} TND</td>
                                 </tr>
@@ -186,7 +193,7 @@
                         </h3>
                         <p class="text-xs text-rose-700">Products that have hit or dropped below their designated alert threshold.</p>
                     </div>
-                    <a href="{{ route('produits.index') }}" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition">
+                    <a href="{{ route('products.index') }}" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition">
                         Manage Inventory &rarr;
                     </a>
                 </div>
@@ -203,13 +210,14 @@
                         <tbody class="divide-y divide-rose-100 text-sm">
                             @foreach($criticalStockProducts as $product)
                                 <tr>
-                                    <td class="py-3 px-4 font-semibold text-gray-900">{{ $product->name }}</td>
-                                    <td class="py-3 px-4 text-center font-bold {{ $product->quantity <= 0 ? 'text-rose-600' : 'text-amber-600' }}">
-                                        {{ $product->quantity }}
+                                    <td class="py-3 px-4 font-semibold text-gray-900">{{ $product->nom ?? $product->name }}</td>
+                                    <!-- ✅ FIXED: Changed quantity to stock -->
+                                    <td class="py-3 px-4 text-center font-bold {{ $product->stock <= 0 ? 'text-rose-600' : 'text-amber-600' }}">
+                                        {{ $product->stock }}
                                     </td>
                                     <td class="py-3 px-4 text-center text-gray-500">{{ $product->seuil_alerte }}</td>
                                     <td class="py-3 px-4 text-right">
-                                        @if($product->quantity <= 0)
+                                        @if($product->stock <= 0)
                                             <span class="px-2 py-0.5 text-xs font-extrabold bg-rose-100 text-rose-700 rounded">Out of Stock</span>
                                         @else
                                             <span class="px-2 py-0.5 text-xs font-extrabold bg-amber-100 text-amber-700 rounded">Low Stock</span>
