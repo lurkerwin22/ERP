@@ -24,7 +24,7 @@ class ProductsFactory extends Factory
             'description' => $this->faker->sentence(),
             'url' => 'https://picsum.photos/',
             'prix' => $this->faker->randomFloat(2, 0, 100),
-            'stock' => $this->faker->numberBetween(1, 100),
+            'stock' => $this->faker->numberBetween(0, 100),
             'seuil_alerte' => $this->faker->numberBetween(1, 20),
         ];
     }
