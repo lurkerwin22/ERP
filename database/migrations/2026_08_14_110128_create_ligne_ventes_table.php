@@ -6,19 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('ligne_ventes', function (Blueprint $table) {
             $table->id();
             
             $table->foreignId('vente_id')->constrained('ventes')->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             
+            // Set to NULL when product is deleted instead of deleting the sale line
+            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
+            
+            // Snapshot columns to preserve historical accuracy
+            $table->string('nom_produit');
             $table->integer('quantite');
-            // Storing price snapshot at moment of purchase
             $table->decimal('prix_unitaire', 10, 2); 
             $table->decimal('sous_total', 10, 2);
 
@@ -26,9 +26,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('ligne_ventes');

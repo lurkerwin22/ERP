@@ -47,60 +47,54 @@ class VenteController extends Controller
      */
     public function show(Vente $vente)
     {
-        $vente->load(['client', 'ligneVentes.produit']);
+        $vente->load(['client', 'ligneVentes.product']);
 
         return view('ventes.show', compact('vente'));
     }
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'client_id'          => ['nullable', 'exists:clients,id'],
-            'items'              => ['required', 'array', 'min:1'],
-            'items.*.product_id' => ['required', 'exists:products,id'], // <-- Updated from produit_id
-            'items.*.quantite'   => ['required', 'integer', 'min:1'],
-            'notes'              => ['nullable', 'string', 'max:1000'],
+            'client_id' => 'nullable|exists:clients,id',
+            'notes'     => 'nullable|string',
+            'items'     => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantite'   => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            $totalVente = 0;
-            $itemsToCreate = [];
+        $itemsToCreate = [];
 
-            foreach ($validated['items'] as $item) {
-                $produit = Products::lockForUpdate()->findOrFail($item['product_id']); // <-- Updated
+        foreach ($validated['items'] as $item) {
+            $product = Products::findOrFail($item['product_id']);
 
-                if ($produit->stock < $item['quantite']) {
-                    throw new \Exception("Stock insuffisant pour: {$produit->name}. Disponible: {$produit->stock}");
-                }
+            $itemsToCreate[] = [
+                'product_id'   => $product->id,
+                'nom_produit'  => $product->name, // Snapshot name
+                'prix_unitaire'=> $product->prix, // Snapshot price
+                'quantite'     => $item['quantite'],
+                'sous_total'   => $product->prix * $item['quantite'],
+            ];
+        }
 
-                $unitPrice = $produit->prix;
-                $subtotal = $unitPrice * $item['quantite'];
-                $totalVente += $subtotal;
-
-                $produit->decrement('stock', $item['quantite']);
-
-                $itemsToCreate[] = [
-                    'product_id'    => $produit->id, // <-- Updated from produit_id
-                    'quantite'      => $item['quantite'],
-                    'prix_unitaire' => $unitPrice,
-                    'sous_total'    => $subtotal,
-                ];
-            }
-
+        DB::transaction(function () use ($validated, $itemsToCreate) {
             $vente = Vente::create([
                 'client_id'  => $validated['client_id'] ?? null,
                 'date_vente' => now(),
-                'total'      => $totalVente,
+                'total'      => array_sum(array_column($itemsToCreate, 'sous_total')),
                 'statut'     => 'completee',
                 'notes'      => $validated['notes'] ?? null,
             ]);
 
             foreach ($itemsToCreate as $item) {
+                // Deduct stock
+                Products::where('id', $item['product_id'])->decrement('stock', $item['quantite']);
+                
+                // Create line item
                 $vente->ligneVentes()->create($item);
             }
         });
 
         return redirect()->route('ventes.index')
-            ->with('success', 'Sale completed successfully and stock updated.');
+            ->with('success', 'Sale created successfully.');
     }
     /**
      * Cancel a completed sale and restore product stock.
@@ -128,7 +122,7 @@ class VenteController extends Controller
     public function invoice(Vente $vente)
     {
         // Load relations for customer and items with product
-        $vente->load(['client', 'ligneVentes.produit']);
+        $vente->load(['client', 'ligneVentes.product']);
 
         return view('ventes.invoice', compact('vente'));
     }

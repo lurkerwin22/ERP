@@ -3,9 +3,9 @@
 <div class="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white border border-blue-500 rounded-lg shadow-sm">
     <!-- Image / Placeholder -->
     <div class="w-full sm:w-32 h-32 flex-shrink-0 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-center overflow-hidden">
-        @if(!empty($product->url))
+        @if(!empty($product->image))
             <img 
-                src="{{ str_starts_with($product->url, 'http') ? $product->url : asset('storage/' . $product->url) }}" 
+                src="{{ str_starts_with($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}" 
                 alt="{{ $product->name }}" 
                 class="w-full h-full object-cover"
             />

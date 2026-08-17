@@ -1,29 +1,28 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LigneVente extends Model
 {
-    use HasFactory;
+    protected $table = 'ligne_ventes';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'vente_id',
+        'product_id',
+        'nom_produit',
+        'quantite',
+        'prix_unitaire',
+        'sous_total',
+    ];
 
-    /**
-     * Relationship: A Sale Line Item belongs to a Sale.
-     */
-    public function vente()
-    {
-        return $this->belongsTo(Vente::class);
-    }
-
-    /**
-     * Relationship: A Sale Line Item belongs to a Product.
-     */
-    public function produit()
+    public function product()
     {
         return $this->belongsTo(Products::class, 'product_id');
+    }
+
+    public function vente()
+    {
+        return $this->belongsTo(Vente::class, 'vente_id');
     }
 }

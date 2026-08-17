@@ -60,7 +60,7 @@ class DashboardController extends Controller
 
         // 6. Top Selling Products (Aggregated from LigneVente)
         $topProducts = LigneVente::select('product_id', DB::raw('SUM(quantite) as total_sold'), DB::raw('SUM(sous_total) as total_revenue'))
-            ->with('produit')
+            ->with('product')
             ->groupBy('product_id')
             ->orderByDesc('total_sold')
             ->take(5)

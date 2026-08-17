@@ -5,7 +5,6 @@
         </div>
 
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8">
-            <!-- Added enctype="multipart/form-data" -->
             <x-forms.form method="POST" action="/products/{{ $product->id }}" enctype="multipart/form-data" class="space-y-6">
                 @method('PATCH')
 
@@ -13,7 +12,7 @@
 
                 <x-forms.input label="Description" name="description" :value="old('description', $product->description)" />
 
-                <!-- Category Select Dropdown (ADDED HERE) -->
+                <!-- Category Select Dropdown -->
                 <div>
                     <label for="categorie_id" class="block text-sm font-medium text-gray-700 mb-1">
                         Category
@@ -36,29 +35,57 @@
                     </select>
                 </div>
 
-                <!-- Existing Image Preview & Upload Fields -->
+                <!-- Image Section -->
                 <div class="space-y-4">
-                    @if($product->url)
+                    <!-- Image Preview -->
+                    @if($product->image)
                         <div>
                             <span class="block text-sm font-medium text-gray-700 mb-2">Current Image</span>
-                            <img src="{{ str_starts_with($product->url, 'http') ? $product->url : asset('storage/' . $product->url) }}" 
+                            <img src="{{ str_starts_with($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}" 
                                  alt="{{ $product->name }}" 
-                                 class="h-24 w-24 object-cover rounded-lg border" />
+                                 class="h-24 w-24 object-cover rounded-lg border border-gray-200" />
                         </div>
                     @endif
 
+                    <!-- Unified Single Image Input with Browse Button -->
                     <div>
-                        <label for="image" class="block text-sm font-medium text-gray-700 mb-1">Upload New Image File</label>
-                        <input type="file" id="image" name="image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-gray-300 rounded-lg p-1.5" />
-                    </div>
+                        <label for="image_input" class="block text-sm font-medium text-gray-700 mb-1">
+                            Product Image
+                        </label>
+                        <div class="relative flex items-center">
+                            <input 
+                                type="text" 
+                                id="image_input"
+                                name="image" 
+                                value="{{ old('image', $product->image) }}"
+                                placeholder="Paste image URL (https://...) or click Browse to upload" 
+                                class="block w-full pr-24 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white text-gray-900"
+                            />
+                            
+                            <!-- Hidden Real File Input -->
+                            <input 
+                                type="file" 
+                                id="file_upload" 
+                                name="image" 
+                                accept="image/*" 
+                                class="hidden" 
+                                onchange="
+                                    if (this.files.length > 0) { 
+                                        document.getElementById('image_input').value = this.files[0].name; 
+                                    }
+                                "
+                            />
 
-                    <div class="relative flex py-1 items-center">
-                        <div class="flex-grow border-t border-gray-200"></div>
-                        <span class="flex-shrink mx-4 text-xs font-semibold text-gray-400 uppercase">OR</span>
-                        <div class="flex-grow border-t border-gray-200"></div>
+                            <!-- Browse Button -->
+                            <button 
+                                type="button" 
+                                onclick="document.getElementById('file_upload').click()" 
+                                class="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-md border border-blue-200 transition-colors flex items-center justify-center"
+                            >
+                                Browse...
+                            </button>
+                        </div>
                     </div>
-
-                    <x-forms.input label="Image URL" name="url" :value="old('url', $product->url)" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">

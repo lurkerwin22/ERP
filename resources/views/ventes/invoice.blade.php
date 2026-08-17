@@ -24,7 +24,7 @@
     <div class="mb-6 flex justify-between items-center pb-4 border-b no-print">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Invoice Details</h1>
-            <p class="text-sm text-gray-500">Invoice reference: {{ $vente->numero_facture }}</p>
+            <p class="text-sm text-gray-500">Invoice reference: #{{ $vente->id }}</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('ventes.show', $vente) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
@@ -43,7 +43,7 @@
         <div class="flex justify-between items-start border-b pb-8">
             <div>
                 <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">INVOICE</h2>
-                <p class="text-sm font-semibold text-indigo-600 mt-1">{{ $vente->numero_facture }}</p>
+                <p class="text-sm font-semibold text-indigo-600 mt-1">#INV-{{ str_pad($vente->id, 6, '0', STR_PAD_LEFT) }}</p>
             </div>
             <div class="text-right">
                 <h3 class="text-lg font-bold text-gray-800">Your Company Name</h3>
@@ -84,7 +84,7 @@
                     @foreach($vente->ligneVentes as $item)
                         <tr>
                             <td class="py-4 px-4 text-sm font-medium text-gray-900">
-                                {{ $item->produit->name ?? 'Product Item' }}
+                                {{ $item->nom_produit }}
                             </td>
                             <td class="py-4 px-4 text-sm text-gray-700 text-center">{{ $item->quantite }}</td>
                             <td class="py-4 px-4 text-sm text-gray-700 text-right">{{ number_format($item->prix_unitaire, 2) }} TND</td>

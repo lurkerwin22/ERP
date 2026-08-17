@@ -33,7 +33,10 @@
                             @foreach($vente->ligneVentes as $item)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3 text-sm font-semibold text-gray-900">
-                                        {{ $item->produit->name ?? 'Product Removed' }}
+                                        {{ $item->nom_produit }}
+                                        @if(is_null($item->product_id))
+                                            <span class="ml-1 text-xs font-normal text-gray-400">(Deleted Product)</span>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-600">
                                         {{ number_format($item->prix_unitaire, 2) }} TND
