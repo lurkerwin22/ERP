@@ -1,24 +1,51 @@
 <x-layout>
     <x-page-heading>Stock Overview</x-page-heading>
 
-    <!-- Active Search Filter Banner -->
-    @if(request('search'))
-        <div class="mb-4 flex items-center justify-between rounded-lg bg-gray-100 p-4 border border-gray-200">
-            <p class="text-sm text-gray-700">
-                Showing results for: <span class="font-semibold text-gray-900">"{{ request('search') }}"</span>
-            </p>
+    <!-- Stock Status Filter Tags -->
+    <div class="mb-6 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 mr-2">Filter Status:</span>
+
+        <!-- All Statuses -->
+        <a href="{{ request()->fullUrlWithQuery(['status' => null]) }}"
+           class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border {{ !request('status') ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
+            All
+        </a>
+
+        <!-- Normal Tag -->
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'normal']) }}"
+           class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border {{ request('status') === 'normal' ? 'bg-green-700 text-white border-green-700 ring-2 ring-green-300' : 'bg-green-50 text-green-800 border-green-200 hover:bg-green-100' }}">
+            Normal
+        </a>
+
+        <!-- Low Stock Tag -->
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'low_stock']) }}"
+           class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border {{ request('status') === 'low_stock' ? 'bg-yellow-600 text-white border-yellow-600 ring-2 ring-yellow-300' : 'bg-yellow-50 text-yellow-800 border-yellow-200 hover:bg-yellow-100' }}">
+            Low Stock
+        </a>
+
+        <!-- Out of Stock Tag -->
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'out_of_stock']) }}"
+           class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border {{ request('status') === 'out_of_stock' ? 'bg-red-700 text-white border-red-700 ring-2 ring-red-300' : 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100' }}">
+            Out of Stock
+        </a>
+
+        <!-- Clear All Filters Button (Shows if search or status filter is active) -->
+        @if(request('status') || request('search'))
             <a href="{{ route('stock.index') }}" 
-               class="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline">
-                Clear search
+               class="ml-auto inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 hover:underline">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Clear Filters
             </a>
-        </div>
-    @endif
+        @endif
+    </div>
+
 
     <x-panel class="overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <!-- Helper PHP Logic for Toggle Direction -->
                     @php
                         function getSortUrl($column) {
                             $currentSort = request('sort', 'name');
@@ -45,26 +72,22 @@
                         }
                     @endphp
 
-                    <!-- Product Column Header -->
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <a href="{{ getSortUrl('name') }}" class="group inline-flex items-center hover:text-gray-900">
                             Product {!! renderSortIcon('name') !!}
                         </a>
                     </th>
 
-                    <!-- Stock Column Header -->
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <a href="{{ getSortUrl('stock') }}" class="group inline-flex items-center hover:text-gray-900">
                             Current Stock {!! renderSortIcon('stock') !!}
                         </a>
                     </th>
 
-                    <!-- Alert Threshold Column Header -->
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Alert Threshold
                     </th>
 
-                    <!-- Status Column Header -->
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <a href="{{ getSortUrl('status') }}" class="group inline-flex items-center hover:text-gray-900">
                             Status {!! renderSortIcon('status') !!}
@@ -112,11 +135,7 @@
                 @empty
                     <tr>
                         <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-                            @if(request('search'))
-                                No products found matching "<span class="font-semibold">{{ request('search') }}</span>".
-                            @else
-                                No products found.
-                            @endif
+                            No products matching the selected criteria.
                         </td>
                     </tr>
                 @endforelse

@@ -16,7 +16,7 @@ class StockController extends Controller
     {
         $query = Products::query();
 
-        // Handle Search if present
+        // 1. Search Filter
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -25,8 +25,22 @@ class StockController extends Controller
             });
         }
 
-        // Handle Sorting
-        $sort = $request->input('sort', 'name'); // Default sort field
+        // 2. Stock Status Tag Filter
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+            
+            if ($status === 'out_of_stock') {
+                $query->where('stock', '<=', 0);
+            } elseif ($status === 'low_stock') {
+                $query->where('stock', '>', 0)
+                      ->whereColumn('stock', '<=', 'seuil_alerte');
+            } elseif ($status === 'normal') {
+                $query->whereColumn('stock', '>', 'seuil_alerte');
+            }
+        }
+
+        // 3. Sorting
+        $sort = $request->input('sort', 'name');
         $direction = strtolower($request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
 
         switch ($sort) {
@@ -35,7 +49,6 @@ class StockController extends Controller
                 break;
 
             case 'status':
-                // Custom SQL ordering for status logic: Out of stock (0) -> Low stock (1) -> Normal (2)
                 $query->orderByRaw("
                     CASE 
                         WHEN stock <= 0 THEN 0 
