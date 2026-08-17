@@ -13,6 +13,29 @@
 
                 <x-forms.input label="Description" name="description" :value="old('description', $product->description)" />
 
+                <!-- Category Select Dropdown (ADDED HERE) -->
+                <div>
+                    <label for="categorie_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                    </label>
+                    <select 
+                        id="categorie_id" 
+                        name="categorie_id" 
+                        class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm"
+                    >
+                        <option value="" {{ is_null(old('categorie_id', $product->categorie_id)) ? 'selected' : '' }}>
+                            No category
+                        </option>
+                        <option disabled>──────────</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" 
+                                {{ old('categorie_id', $product->categorie_id) == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <!-- Existing Image Preview & Upload Fields -->
                 <div class="space-y-4">
                     @if($product->url)

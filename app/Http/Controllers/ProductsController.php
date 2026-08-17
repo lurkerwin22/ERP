@@ -92,7 +92,9 @@ class ProductsController extends Controller
      */
     public function edit(Products $product)
     {
-        return view('products.edit',['product' => $product]);
+        $categories = Categorie::all();
+
+        return view('products.edit', compact('product', 'categories'));
     }
 
     /**
@@ -102,32 +104,19 @@ class ProductsController extends Controller
     {
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string', 'max:254'],
-            'image'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'url'          => ['nullable', 'string'],
-            'prix'         => ['required', 'numeric'],
-            'stock'        => ['required', 'numeric'],
-            'seuil_alerte' => ['required', 'numeric'],
+            'description'  => ['nullable', 'string'],
+            'prix'         => ['required', 'numeric', 'min:0'],
+            'stock'        => ['required', 'numeric', 'min:0'],
+            'seuil_alerte' => ['required', 'numeric', 'min:0'],
+            'categorie_id' => ['nullable', 'exists:categories,id'], // Allows NULL or a valid category ID
         ]);
 
-        // Handle New Image Upload
-        if ($request->hasFile('image')) {
-            // Optionally delete old image if it was uploaded locally
-            if ($product->url && !str_starts_with($product->url, 'http')) {
-                Storage::disk('public')->delete($product->url);
-            }
-
-            $path = $request->file('image')->store('products', 'public');
-            $validated['url'] = $path;
-        }
-
-        unset($validated['image']);
-
+        // Updates categorie_id to NULL if 'No category' was selected
         $product->update($validated);
 
-        return redirect('/products')->with('success', 'Product updated successfully.');
+        return redirect()->route('products.index')
+            ->with('success', 'Product updated successfully.');
     }
-
     /**
      * Remove the specified resource from storage.
      */
