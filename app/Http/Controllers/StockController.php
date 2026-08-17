@@ -12,9 +12,47 @@ class StockController extends Controller
     /**
      * Step 8: Display general stock overview & alerts
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Products::latest()->Paginate(10);
+        $query = Products::query();
+
+        // Handle Search if present
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Handle Sorting
+        $sort = $request->input('sort', 'name'); // Default sort field
+        $direction = strtolower($request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        switch ($sort) {
+            case 'stock':
+                $query->orderBy('stock', $direction);
+                break;
+
+            case 'status':
+                // Custom SQL ordering for status logic: Out of stock (0) -> Low stock (1) -> Normal (2)
+                $query->orderByRaw("
+                    CASE 
+                        WHEN stock <= 0 THEN 0 
+                        WHEN stock <= seuil_alerte THEN 1 
+                        ELSE 2 
+                    END {$direction}
+                ");
+                break;
+
+            case 'name':
+            default:
+                $query->orderBy('name', $direction);
+                break;
+        }
+
+        $products = $query->paginate(10)->withQueryString();
+
         return view('stock.index', compact('products'));
     }
 

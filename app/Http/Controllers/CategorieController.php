@@ -10,9 +10,20 @@ class CategorieController extends Controller
     /**
      * Display a listing of categories.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Categorie::withCount('products')->latest()->paginate(10);
+        $query = Categorie::withCount('products');
+
+        // Filter categories if search parameter is present
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $categories = $query->latest()->paginate(10)->withQueryString();
 
         return view('categories.index', [
             'categories' => $categories
