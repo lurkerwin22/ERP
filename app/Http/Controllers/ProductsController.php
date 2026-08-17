@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Products;
 use App\Models\Categorie;
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
 {
@@ -32,20 +32,19 @@ class ProductsController extends Controller
         ]);
     }
 
-    
-
     /**
      * Show the form for creating a new resource.
      */
     public function create(Request $request)
     {
         $categorie = null;
+        $categories = Categorie::all();
 
         if ($request->has('categorie')) {
             $categorie = Categorie::findOrFail($request->categorie);
         }
 
-        return view('products.create', compact('categorie'));
+        return view('products.create', compact('categorie', 'categories'));
     }
 
     /**
@@ -56,36 +55,25 @@ class ProductsController extends Controller
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string'],
-            'image'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'url'          => ['nullable', 'url'],
+            'image'        => ['nullable'], // Accepts either uploaded File OR string URL
             'prix'         => ['required', 'numeric', 'min:0'],
             'stock'        => ['required', 'numeric', 'min:0'],
             'seuil_alerte' => ['required', 'numeric', 'min:0'],
-            'categorie_id' => ['required', 'exists:categories,id'],
+            'categorie_id' => ['nullable', 'exists:categories,id'],
         ]);
 
-        // Handle Image Upload or URL fallback
+        // Handle File Upload or URL String input for `image`
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $validated['url'] = $path;
+            $validated['image'] = $request->file('image')->store('products', 'public');
+        } elseif (is_string($request->input('image'))) {
+            $validated['image'] = $request->input('image');
         }
-
-        unset($validated['image']);
 
         Products::create($validated);
 
         return redirect()->route('products.index')
             ->with('success', 'Product created successfully.');
     }
-
-    /**
-     * Display the specified resource.
-     */
-    /* public function show(products $products)
-    {
-        $product = Products::find($products);
-        return view('products.show',['products' => $product]);
-    } */
 
     /**
      * Show the form for editing the specified resource.
@@ -105,31 +93,54 @@ class ProductsController extends Controller
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string'],
+            'image'        => ['required'], // Accepts File OR string URL
             'prix'         => ['required', 'numeric', 'min:0'],
             'stock'        => ['required', 'numeric', 'min:0'],
             'seuil_alerte' => ['required', 'numeric', 'min:0'],
-            'categorie_id' => ['nullable', 'exists:categories,id'], // Allows NULL or a valid category ID
+            'categorie_id' => ['nullable', 'exists:categories,id'],
         ]);
 
-        // Updates categorie_id to NULL if 'No category' was selected
+        // Handle File Upload or URL String update for `image`
+        if ($request->hasFile('image')) {
+            // Delete old uploaded local file if exists
+            if ($product->image && !str_starts_with($product->image, 'http')) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $validated['image'] = $request->file('image')->store('products', 'public');
+        } elseif ($request->filled('image')) {
+            $validated['image'] = $request->input('image');
+        } else {
+            // Keep existing image if no new file or URL string provided
+            unset($validated['image']);
+        }
+
         $product->update($validated);
 
         return redirect()->route('products.index')
             ->with('success', 'Product updated successfully.');
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Products $product)
     {
+        // Delete stored image file if local
+        if ($product->image && !str_starts_with($product->image, 'http')) {
+            Storage::disk('public')->delete($product->image);
+        }
+
         $product->delete();
-        return redirect('/products');
+        return redirect()->route('products.index');
     }
+
+    /**
+     * Display products by category.
+     */
     public function categorie(Categorie $categorie)
     {
         $products = $categorie->products()->latest()->paginate(10);
 
         return view('products.index', compact('products', 'categorie'));
     }
-
 }
