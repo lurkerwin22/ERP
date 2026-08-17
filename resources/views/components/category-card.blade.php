@@ -15,13 +15,15 @@
     <div class="space-y-2 mb-6 text-sm text-blue-500 font-medium">
         <div class="flex justify-between items-center">
             <span>tot_revenue:</span>
-            <span class="font-semibold">$0</span>
+            <span class="font-semibold">
+                ${{ number_format($categorie->tot_revenue ?? 0, 2) }}
+            </span>
         </div>
 
         <div class="flex justify-between items-center">
             <span>nb of products:</span>
             <span class="font-semibold">
-                {{ $categorie->products_count ?? $categorie->nb_of_products ?? 0 }}
+                {{ $categorie->products_count ?? 0 }}
             </span>
         </div>
     </div>
