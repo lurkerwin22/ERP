@@ -11,14 +11,20 @@ class LigneVente extends Model
         'vente_id',
         'product_id',
         'nom_produit',
-        'quantite',
         'prix_unitaire',
+        'quantite',
         'sous_total',
     ];
 
     public function product()
     {
         return $this->belongsTo(Products::class, 'product_id');
+    }
+
+    // Alias so both $item->product and $item->produit work safely
+    public function produit()
+    {
+        return $this->product();
     }
 
     public function vente()

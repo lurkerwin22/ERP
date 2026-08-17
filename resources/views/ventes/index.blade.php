@@ -68,8 +68,11 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                                 #{{ $vente->id }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $vente->client ? ($vente->client->nom ?? $vente->client->name) : 'Walk-in Customer' }}
+                            <td class="px-6 py-4 text-sm text-gray-800">
+                                {{ $vente->client_nom ?? optional($vente->client)->nom ?? 'Walk-in Customer' }}
+                                @if(is_null($vente->client_id) && $vente->client_nom && $vente->client_nom !== 'Walk-in Customer')
+                                    <span class="text-xs text-gray-400 block">(Deleted Customer)</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ \Carbon\Carbon::parse($vente->date_vente)->format('M d, Y H:i') }}

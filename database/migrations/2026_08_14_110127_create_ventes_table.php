@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('ventes', function (Blueprint $table) {
             $table->id();
             
-            // Client relationship (nullable if walk-in customer)
+            // Foreign key with nullOnDelete
             $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
             
+            // --- CLIENT SNAPSHOT FIELDS ---
+            $table->string('client_nom')->nullable();
+            $table->string('client_telephone')->nullable();
+            $table->string('client_adresse')->nullable();
+
             $table->timestamp('date_vente')->useCurrent();
             $table->decimal('total', 10, 2)->default(0.00);
-            
-            // Status for sale management (completed, cancelled)
             $table->enum('statut', ['completee', 'annulee'])->default('completee');
             $table->text('notes')->nullable();
 

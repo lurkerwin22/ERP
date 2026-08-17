@@ -33,9 +33,10 @@
                             @foreach($vente->ligneVentes as $item)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3 text-sm font-semibold text-gray-900">
+                                        <!-- Snapshot Name -->
                                         {{ $item->nom_produit }}
                                         @if(is_null($item->product_id))
-                                            <span class="ml-1 text-xs font-normal text-gray-400">(Deleted Product)</span>
+                                            <span class="ml-1 text-xs font-normal text-gray-400">(Archived Product)</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-600">
@@ -58,17 +59,19 @@
         <!-- Order Summary & Customer Sidebar -->
         <div class="space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                <h2 class="text-lg font-bold text-gray-900 border-b pb-2">Customer & Status</h2>
-                
-                <div>
-                    <label class="text-xs text-gray-500 uppercase font-semibold">Customer</label>
-                    <p class="text-sm font-bold text-gray-900 mt-1">
-                        {{ $vente->client->nom ?? 'Walk-in Customer' }}
-                    </p>
-                    @if($vente->client)
-                        <p class="text-xs text-gray-500">{{ $vente->client->telephone }}</p>
-                    @endif
-                </div>
+            <h2 class="text-lg font-bold text-gray-900 border-b pb-2">Customer & Status</h2>      
+        <div>
+            <label class="text-xs text-gray-500 uppercase font-semibold">Customer</label>
+            <p class="text-sm font-bold text-gray-900 mt-1">
+                {{ $vente->client_nom ?? optional($vente->client)->nom ?? 'Walk-in Customer' }}
+                @if(is_null($vente->client_id) && $vente->client_nom && $vente->client_nom !== 'Walk-in Customer')
+                    <span class="text-xs font-normal text-gray-400 block">(Deleted Customer)</span>
+                @endif
+            </p>
+            @if($vente->client_telephone || optional($vente->client)->telephone)
+                <p class="text-xs text-gray-500">{{ $vente->client_telephone ?? optional($vente->client)->telephone }}</p>
+            @endif
+        </div>
 
                 <div>
                     <label class="text-xs text-gray-500 uppercase font-semibold">Status</label>

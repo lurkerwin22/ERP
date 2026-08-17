@@ -22,7 +22,7 @@ class ProductsFactory extends Factory
             'categorie_id' => Categorie::factory(),
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
-            'url' => 'https://picsum.photos/',
+            'image' => 'https://picsum.photos/100',
             'prix' => $this->faker->randomFloat(2, 0, 100),
             'stock' => $this->faker->numberBetween(0, 100),
             'seuil_alerte' => $this->faker->numberBetween(1, 20),

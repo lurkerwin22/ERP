@@ -1,8 +1,6 @@
 <x-layout>
-    <!-- Embedded Print Styles (Hides layout headers, sidebars, and buttons when printing) -->
     <style>
         @media print {
-            /* Hide application navigation bars, headers, and action buttons */
             nav, header, aside, .no-print {
                 display: none !important;
             }
@@ -20,11 +18,10 @@
         }
     </style>
 
-    <!-- Top Action Toolbar -->
     <div class="mb-6 flex justify-between items-center pb-4 border-b no-print">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Invoice Details</h1>
-            <p class="text-sm text-gray-500">Invoice reference: #{{ $vente->id }}</p>
+            <p class="text-sm text-gray-500">Invoice reference: #INV-{{ str_pad($vente->id, 6, '0', STR_PAD_LEFT) }}</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('ventes.show', $vente) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
@@ -36,10 +33,7 @@
         </div>
     </div>
 
-    <!-- Printable Invoice Document Box -->
     <div class="invoice-container max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-xl shadow-sm border border-gray-200">
-        
-        <!-- Document Header -->
         <div class="flex justify-between items-start border-b pb-8">
             <div>
                 <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">INVOICE</h2>
@@ -52,14 +46,17 @@
             </div>
         </div>
 
-        <!-- Meta Information -->
         <div class="grid grid-cols-2 gap-8 my-8">
             <div>
                 <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Billed To</h4>
-                <p class="text-base font-bold text-gray-800">{{ $vente->client->nom ?? 'Walk-in Customer' }}</p>
-                @if($vente->client)
-                    <p class="text-sm text-gray-600">{{ $vente->client->telephone }}</p>
-                    <p class="text-sm text-gray-600">{{ $vente->client->adresse ?? '' }}</p>
+                <p class="text-base font-bold text-gray-800">
+                    {{ $vente->client_nom ?? optional($vente->client)->nom ?? 'Walk-in Customer' }}
+                </p>
+                @if($vente->client_telephone || optional($vente->client)->telephone)
+                    <p class="text-sm text-gray-600">{{ $vente->client_telephone ?? optional($vente->client)->telephone }}</p>
+                @endif
+                @if($vente->client_adresse || optional($vente->client)->adresse)
+                    <p class="text-sm text-gray-600">{{ $vente->client_adresse ?? optional($vente->client)->adresse }}</p>
                 @endif
             </div>
             <div class="text-right">
@@ -69,7 +66,6 @@
             </div>
         </div>
 
-        <!-- Line Items Table -->
         <div class="overflow-x-auto my-6">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -84,6 +80,7 @@
                     @foreach($vente->ligneVentes as $item)
                         <tr>
                             <td class="py-4 px-4 text-sm font-medium text-gray-900">
+                                <!-- Product Snapshot -->
                                 {{ $item->nom_produit }}
                             </td>
                             <td class="py-4 px-4 text-sm text-gray-700 text-center">{{ $item->quantite }}</td>
@@ -95,7 +92,6 @@
             </table>
         </div>
 
-        <!-- Totals Section -->
         <div class="flex justify-end border-t pt-6">
             <div class="w-full md:w-1/2 space-y-2">
                 <div class="flex justify-between text-sm text-gray-600">
@@ -109,7 +105,6 @@
             </div>
         </div>
 
-        <!-- Document Footer -->
         <div class="mt-12 border-t pt-6 text-center text-xs text-gray-400">
             Thank you for your business!
         </div>

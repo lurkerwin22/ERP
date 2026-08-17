@@ -96,15 +96,9 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        // Check if the Vente model exists before running the relationship check
-        if (class_exists(\App\Models\Vente::class) && $client->ventes()->exists()) {
-            return redirect()->back()
-                ->withErrors(['delete' => 'Cannot delete customer with associated sales records.']);
-        }
-
         $client->delete();
 
         return redirect()->route('clients.index')
-            ->with('success', 'Customer deleted successfully.');
+            ->with('success', 'Client deleted successfully. Historical sales records have been preserved.');
     }
 }
