@@ -23,7 +23,7 @@ class CategorieController extends Controller
             });
         }
 
-        $categories = $query->latest()->paginate(10)->withQueryString();
+        $categories = $query->latest()->paginate(9)->withQueryString();
 
         return view('categories.index', [
             'categories' => $categories

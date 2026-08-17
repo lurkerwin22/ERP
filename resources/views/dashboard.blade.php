@@ -53,7 +53,7 @@
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Catalog Products</p>
-                    <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($totalProducts) }}</p>
+                    <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($totalProducts)}}</p>
                     <p class="text-xs text-gray-400 mt-1">Total Units: <span class="font-bold text-gray-700">{{ number_format($stockStats->total_units ?? 0) }}</span></p>
                 </div>
                 <div class="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
@@ -193,7 +193,7 @@
                         </h3>
                         <p class="text-xs text-rose-700">Products that have hit or dropped below their designated alert threshold.</p>
                     </div>
-                    <a href="{{ route('products.index') }}" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition">
+                    <a href="{{ route('stock.index') }}" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition">
                         Manage Inventory &rarr;
                     </a>
                 </div>
