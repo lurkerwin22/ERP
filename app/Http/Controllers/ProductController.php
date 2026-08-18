@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Products;
-use App\Models\Categorie;
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class ProductsController extends Controller
+class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Products::query();
+        $query = Product::query();
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -28,7 +28,7 @@ class ProductsController extends Controller
 
         return view('products.index', [
             'products'  => $products,
-            'categorie' => null,
+            'category' => null,
         ]);
     }
 
@@ -37,14 +37,14 @@ class ProductsController extends Controller
      */
     public function create(Request $request)
     {
-        $categorie = null;
-        $categories = Categorie::all();
+        $category = null;
+        $categories = Category::all();
 
-        if ($request->has('categorie')) {
-            $categorie = Categorie::findOrFail($request->categorie);
+        if ($request->has('category')) {
+            $category = Category::findOrFail($request->category);
         }
 
-        return view('products.create', compact('categorie', 'categories'));
+        return view('products.create', compact('category', 'categories'));
     }
 
     /**
@@ -56,10 +56,10 @@ class ProductsController extends Controller
             'name'         => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string'],
             'image'        => ['nullable'], // Accepts either uploaded File OR string URL
-            'prix'         => ['required', 'numeric', 'min:0'],
+            'price'         => ['required', 'numeric', 'min:0'],
             'stock'        => ['required', 'numeric', 'min:0'],
-            'seuil_alerte' => ['required', 'numeric', 'min:0'],
-            'categorie_id' => ['nullable', 'exists:categories,id'],
+            'alert_threshold' => ['required', 'numeric', 'min:0'],
+            'category_id' => ['nullable', 'exists:categories,id'],
         ]);
 
         // Handle File Upload or URL String input for `image`
@@ -69,7 +69,7 @@ class ProductsController extends Controller
             $validated['image'] = $request->input('image');
         }
 
-        Products::create($validated);
+        Product::create($validated);
 
         return redirect()->route('products.index')
             ->with('success', 'Product created successfully.');
@@ -78,9 +78,9 @@ class ProductsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Products $product)
+    public function edit(Product $product)
     {
-        $categories = Categorie::all();
+        $categories = Category::all();
 
         return view('products.edit', compact('product', 'categories'));
     }
@@ -88,16 +88,16 @@ class ProductsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Products $product)
+    public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string'],
             'image'        => ['required'], // Accepts File OR string URL
-            'prix'         => ['required', 'numeric', 'min:0'],
+            'price'         => ['required', 'numeric', 'min:0'],
             'stock'        => ['required', 'numeric', 'min:0'],
-            'seuil_alerte' => ['required', 'numeric', 'min:0'],
-            'categorie_id' => ['nullable', 'exists:categories,id'],
+            'alert_threshold' => ['required', 'numeric', 'min:0'],
+            'category_id' => ['nullable', 'exists:categories,id'],
         ]);
 
         // Handle File Upload or URL String update for `image`
@@ -123,7 +123,7 @@ class ProductsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Products $product)
+    public function destroy(Product $product)
     {
         // Delete stored image file if local
         if ($product->image && !str_starts_with($product->image, 'http')) {
@@ -137,10 +137,10 @@ class ProductsController extends Controller
     /**
      * Display products by category.
      */
-    public function categorie(Categorie $categorie)
+    public function category(Category $category)
     {
-        $products = $categorie->products()->latest()->paginate(10);
+        $products = $category->products()->latest()->paginate(10);
 
-        return view('products.index', compact('products', 'categorie'));
+        return view('products.index', compact('products', 'category'));
     }
 }

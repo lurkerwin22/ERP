@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
             
-            // Using 'produit_id' to match your class diagram's Produit entity
+            // Using 'product_id' to match your class diagram's Product entity
             $table->foreignId('product_id')
                   ->constrained('products')
                   ->onDelete('cascade');

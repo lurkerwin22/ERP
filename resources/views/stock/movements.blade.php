@@ -1,6 +1,6 @@
 <x-layout>
     <div class="mb-6 flex justify-between items-center">
-        <x-page-heading>Movement History: {{ $product->nom ?? $product->name }}</x-page-heading>
+        <x-page-heading>Movement History: {{ $product->name ?? $product->name }}</x-page-heading>
         <div class="space-x-4">
             <a href="{{ route('stock.adjust', $product) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Manage Stock</a>
             <a href="{{ route('stock.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Stock</a>

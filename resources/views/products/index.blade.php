@@ -11,9 +11,9 @@
             </a>
         </div>
     @endif
-    @if($categorie)
+    @if($category)
     <div class="space-y-4 w-full bg-blue-800/90 p-2 flex items-center justify-center text-white mb-4 border rounded-lg hover:bg-blue-800 transition-colors">
-            <a href="{{ route('products.create', ['categorie' => $categorie->id]) }}"
+            <a href="{{ route('products.create', ['category' => $category->id]) }}"
                class="w-full px-auto py-2 text-center">
                 Create a Product
             </a>

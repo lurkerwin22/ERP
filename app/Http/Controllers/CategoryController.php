@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categorie;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
-class CategorieController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of categories.
      */
     public function index(Request $request)
     {
-        $query = Categorie::withCount('products');
+        $query = Category::withCount('products');
 
         // Filter categories if search parameter is present
         if ($request->filled('search')) {
@@ -48,57 +48,57 @@ class CategorieController extends Controller
             'description' => ['nullable', 'string', 'max:254'],
         ]);
 
-        Categorie::create($validated);
+        Category::create($validated);
 
         return redirect('/categories')
-            ->with('success', 'Catégorie créée avec succès.');
+            ->with('success', 'Category created successfully.');
     }
 
     /**
      * Display the specified category.
      */
-    public function show(Categorie $categorie)
+    public function show(Category $category)
     {
         return view('categories.show', [
-            'categorie' => $categorie
+            'category' => $category
         ]);
     }
 
     /**
      * Show the form for editing the specified category.
      */
-    public function edit(Categorie $categorie)
+    public function edit(Category $category)
     {
         return view('categories.edit', [
-            'categorie' => $categorie
+            'category' => $category
         ]);
     }
 
     /**
      * Update the specified category in storage.
      */
-    public function update(Request $request, Categorie $categorie)
+    public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:254'],
         ]);
 
-        $categorie->update($validated);
+        $category->update($validated);
 
         return redirect('/categories')
-            ->with('success', 'Catégorie modifiée avec succès.');
+            ->with('success', 'Category updated successfully.');
     }
 
     /**
      * Remove the specified category from storage.
      */
-    public function destroy(Categorie $categorie)
+    public function destroy(Category $category)
     {
-        $categorie->delete();
+        $category->delete();
 
         return redirect('/categories')
-            ->with('success', 'Catégorie supprimée avec succès.');
+            ->with('success', 'Category deleted successfully.');
     }
 }
 

@@ -36,7 +36,7 @@
             </li>
 
 
-            <!-- Products -->
+            <!-- Product -->
             <li>
                 <a href="/products"
                    class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
@@ -49,7 +49,7 @@
                               d="M20 7.5 12 3 4 7.5m16 0v9L12 21l-8-4.5v-9m16 0-8 4.5m0 0L4 7.5M12 12v9"/>
                     </svg>
 
-                    <span class="flex-1 ms-3 whitespace-nowrap">Products</span>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Product</span>
                 </a>
             </li>
 
@@ -93,9 +93,9 @@
             </li>
 
 
-            <!-- Clients -->
+            <!-- Customers -->
             <li>
-                <a href="/clients"
+                <a href="/customers"
                    class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
 
                     <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
@@ -114,14 +114,14 @@
                               d="M17 19h4"/>
                     </svg>
 
-                    <span class="flex-1 ms-3 whitespace-nowrap">Clients</span>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Customers</span>
                 </a>
             </li>
 
 
-            <!-- Ventes -->
+            <!-- Sales -->
             <li>
-                <a href="/ventes"
+                <a href="/sales"
                    class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
 
                     <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
@@ -138,7 +138,7 @@
                               d="M15 17h2"/>
                     </svg>
 
-                    <span class="flex-1 ms-3 whitespace-nowrap">Ventes</span>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Sales</span>
                 </a>
             </li>
 

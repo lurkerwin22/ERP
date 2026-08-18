@@ -14,21 +14,21 @@
 
                 <!-- Category Select Dropdown -->
                 <div>
-                    <label for="categorie_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">
                         Category
                     </label>
                     <select 
-                        id="categorie_id" 
-                        name="categorie_id" 
+                        id="category_id" 
+                        name="category_id" 
                         class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm"
                     >
-                        <option value="" {{ is_null(old('categorie_id', $product->categorie_id)) ? 'selected' : '' }}>
+                        <option value="" {{ is_null(old('category_id', $product->category_id)) ? 'selected' : '' }}>
                             No category
                         </option>
                         <option disabled>──────────</option>
                         @foreach($categories as $cat)
                             <option value="{{ $cat->id }}" 
-                                {{ old('categorie_id', $product->categorie_id) == $cat->id ? 'selected' : '' }}>
+                                {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>
                                 {{ $cat->name }}
                             </option>
                         @endforeach
@@ -89,11 +89,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <x-forms.input label="Price ($)" name="prix" type="number" step="0.01" :value="old('prix', $product->prix)" />
+                    <x-forms.input label="Price ($)" name="price" type="number" step="0.01" :value="old('price', $product->price)" />
 
                     <x-forms.input label="Stock" name="stock" type="number" :value="old('stock', $product->stock)" />
 
-                    <x-forms.input label="Seuil d'alerte" name="seuil_alerte" type="number" :value="old('seuil_alerte', $product->seuil_alerte)" />
+                    <x-forms.input label="Alert Threshold" name="alert_threshold" type="number" :value="old('alert_threshold', $product->alert_threshold)" />
                 </div>
 
                 <x-forms.divider />

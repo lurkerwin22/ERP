@@ -1,14 +1,14 @@
 <x-layout>
     <div class="mb-6 flex justify-between items-center pb-4 border-b">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Sale Details #{{ $vente->id }}</h1>
-            <p class="text-sm text-gray-500">Recorded on {{ $vente->created_at->format('d/m/Y H:i') }}</p>
+            <h1 class="text-2xl font-bold text-gray-900">Sale Details #{{ $sale->id }}</h1>
+            <p class="text-sm text-gray-500">Recorded on {{ $sale->created_at->format('d/m/Y H:i') }}</p>
         </div>
         <div class="flex space-x-3">
-            <a href="{{ route('ventes.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
+            <a href="{{ route('sales.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
                 &larr; Back to Sales
             </a>
-            <a href="{{ route('ventes.invoice', $vente) }}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
+            <a href="{{ route('sales.invoice', $sale) }}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
                 📄 View / Print Invoice
             </a>
         </div>
@@ -30,23 +30,23 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            @foreach($vente->ligneVentes as $item)
+                            @foreach($sale->saleItems as $item)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3 text-sm font-semibold text-gray-900">
                                         <!-- Snapshot Name -->
-                                        {{ $item->nom_produit }}
+                                        {{ $item->product_name }}
                                         @if(is_null($item->product_id))
                                             <span class="ml-1 text-xs font-normal text-gray-400">(Archived Product)</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-600">
-                                        {{ number_format($item->prix_unitaire, 2) }} TND
+                                        {{ number_format($item->unit_price, 2) }} TND
                                     </td>
                                     <td class="px-4 py-3 text-sm text-center font-medium">
-                                        {{ $item->quantite }}
+                                        {{ $item->quantity }}
                                     </td>
                                     <td class="px-4 py-3 text-right text-sm font-bold text-gray-900">
-                                        {{ number_format($item->sous_total, 2) }} TND
+                                        {{ number_format($item->subtotal, 2) }} TND
                                     </td>
                                 </tr>
                             @endforeach
@@ -63,20 +63,20 @@
         <div>
             <label class="text-xs text-gray-500 uppercase font-semibold">Customer</label>
             <p class="text-sm font-bold text-gray-900 mt-1">
-                {{ $vente->client_nom ?? optional($vente->client)->nom ?? 'Walk-in Customer' }}
-                @if(is_null($vente->client_id) && $vente->client_nom && $vente->client_nom !== 'Walk-in Customer')
+                {{ $sale->customer_name ?? optional($sale->customer)->name ?? 'Walk-in Customer' }}
+                @if(is_null($sale->customer_id) && $sale->customer_name && $sale->customer_name !== 'Walk-in Customer')
                     <span class="text-xs font-normal text-gray-400 block">(Deleted Customer)</span>
                 @endif
             </p>
-            @if($vente->client_telephone || optional($vente->client)->telephone)
-                <p class="text-xs text-gray-500">{{ $vente->client_telephone ?? optional($vente->client)->telephone }}</p>
+            @if($sale->customer_phone || optional($sale->customer)->phone)
+                <p class="text-xs text-gray-500">{{ $sale->customer_phone ?? optional($sale->customer)->phone }}</p>
             @endif
         </div>
 
                 <div>
                     <label class="text-xs text-gray-500 uppercase font-semibold">Status</label>
                     <div class="mt-1">
-                        @if($vente->statut === 'completee')
+                        @if($sale->status === 'completed')
                             <span class="px-2.5 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Completed</span>
                         @else
                             <span class="px-2.5 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Cancelled</span>
@@ -84,16 +84,16 @@
                     </div>
                 </div>
 
-                @if($vente->notes)
+                @if($sale->notes)
                     <div>
                         <label class="text-xs text-gray-500 uppercase font-semibold">Notes</label>
-                        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border text-xs mt-1">{{ $vente->notes }}</p>
+                        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border text-xs mt-1">{{ $sale->notes }}</p>
                     </div>
                 @endif
 
                 <div class="pt-4 border-t border-gray-200">
                     <span class="text-xs font-semibold text-gray-500 uppercase">Total Amount</span>
-                    <p class="text-3xl font-extrabold text-indigo-600 mt-1">{{ number_format($vente->total, 2) }} TND</p>
+                    <p class="text-3xl font-extrabold text-indigo-600 mt-1">{{ number_format($sale->total, 2) }} TND</p>
                 </div>
             </div>
         </div>

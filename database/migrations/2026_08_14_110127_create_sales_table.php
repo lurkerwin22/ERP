@@ -11,20 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ventes', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table) {
             $table->id();
             
             // Foreign key with nullOnDelete
-            $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             
             // --- CLIENT SNAPSHOT FIELDS ---
-            $table->string('client_nom')->nullable();
-            $table->string('client_telephone')->nullable();
-            $table->string('client_adresse')->nullable();
+            $table->string('customer_name')->nullable();
+            $table->string('customer_phone')->nullable();
+            $table->string('customer_address')->nullable();
 
-            $table->timestamp('date_vente')->useCurrent();
+            $table->timestamp('sale_date')->useCurrent();
             $table->decimal('total', 10, 2)->default(0.00);
-            $table->enum('statut', ['completee', 'annulee'])->default('completee');
+            $table->enum('status', ['completed', 'cancelled'])->default('completed');
             $table->text('notes')->nullable();
 
             $table->timestamps();
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ventes');
+        Schema::dropIfExists('sales');
     }
 };

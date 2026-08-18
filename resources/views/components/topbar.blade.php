@@ -17,7 +17,7 @@
             <input
                 id="search-field"
                 class="block w-full rounded-md border border-gray-300 bg-gray-50 py-2 pl-10 pr-3 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
-                placeholder="{{ request()->routeIs('categories.*') ? 'Search categories...' : 'Search products, clients, sales...' }}"
+                placeholder="{{ request()->routeIs('categories.*') ? 'Search categories...' : 'Search products, customers, sales...' }}"
                 type="search"
                 name="search"
                 value="{{ request('search') }}"

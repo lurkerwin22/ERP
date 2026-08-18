@@ -8,19 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('ligne_ventes', function (Blueprint $table) {
+        Schema::create('sale_items', function (Blueprint $table) {
             $table->id();
             
-            $table->foreignId('vente_id')->constrained('ventes')->cascadeOnDelete();
+            $table->foreignId('sale_id')->constrained('sales')->cascadeOnDelete();
             
             // Set to NULL when product is deleted instead of deleting the sale line
             $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
             
             // Snapshot columns to preserve historical accuracy
-            $table->string('nom_produit');
-            $table->integer('quantite');
-            $table->decimal('prix_unitaire', 10, 2); 
-            $table->decimal('sous_total', 10, 2);
+            $table->string('product_name');
+            $table->integer('quantity');
+            $table->decimal('unit_price', 10, 2); 
+            $table->decimal('subtotal', 10, 2);
 
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('ligne_ventes');
+        Schema::dropIfExists('sale_items');
     }
 };

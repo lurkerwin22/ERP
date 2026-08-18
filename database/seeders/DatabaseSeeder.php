@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Models\Client;
+use App\Models\Customer;
 use Illuminate\Database\Seeder;
 
 
@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-        Client::factory(80)->create();
-        $this->call(ProductsSeeder::class);
+        Customer::factory(80)->create();
+        $this->call(ProductSeeder::class);
     }
 }

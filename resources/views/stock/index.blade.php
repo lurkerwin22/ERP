@@ -103,20 +103,20 @@
                 @forelse($products as $product)
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ $product->nom ?? $product->name }}
+                            {{ $product->name ?? $product->name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">
                             {{ $product->stock }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $product->seuil_alerte }}
+                            {{ $product->alert_threshold }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             @if($product->stock <= 0)
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                     Out of stock
                                 </span>
-                            @elseif($product->stock <= $product->seuil_alerte)
+                            @elseif($product->stock <= $product->alert_threshold)
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                     Low stock
                                 </span>

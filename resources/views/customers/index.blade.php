@@ -4,13 +4,13 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Customers</h1>
-                <p class="text-sm text-gray-500">Manage your client list, contacts, and account details.</p>
+                <p class="text-sm text-gray-500">Manage your customer list, contacts, and account details.</p>
             </div>
 
             <!-- Actions Block -->
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Search Form -->
-                <form action="{{ route('clients.index') }}" method="GET" class="flex items-center gap-2">
+                <form action="{{ route('customers.index') }}" method="GET" class="flex items-center gap-2">
                     <input 
                         type="text" 
                         name="search" 
@@ -22,14 +22,14 @@
                         Search
                     </button>
                     @if(request('search'))
-                        <a href="{{ route('clients.index') }}" class="text-sm text-gray-500 hover:text-gray-700 underline px-1">
+                        <a href="{{ route('customers.index') }}" class="text-sm text-gray-500 hover:text-gray-700 underline px-1">
                             Clear
                         </a>
                     @endif
                 </form>
 
                 <!-- Add Customer Button -->
-                <a href="{{ route('clients.create') }}" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors whitespace-nowrap">
+                <a href="{{ route('customers.create') }}" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors whitespace-nowrap">
                     + Add Customer
                 </a>
             </div>
@@ -63,26 +63,26 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
-                    @forelse($clients as $client)
+                    @forelse($customers as $customer)
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                <a href="{{ route('clients.show', $client) }}" class="hover:text-indigo-600">
-                                    {{ $client->nom }}
+                                <a href="{{ route('customers.show', $customer) }}" class="hover:text-indigo-600">
+                                    {{ $customer->name }}
                                 </a>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {{ $client->email }}
+                                {{ $customer->email }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {{ $client->telephone }}
+                                {{ $customer->phone }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $client->ville ?? '-' }}
+                                {{ $customer->city ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ route('clients.show', $client) }}" class="text-gray-600 hover:text-gray-900">View</a>
+                                <a href="{{ route('customers.show', $customer) }}" class="text-gray-600 hover:text-gray-900">View</a>
                                 <span class="text-gray-300">|</span>
-                                <a href="{{ route('clients.edit', $client) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                <a href="{{ route('customers.edit', $customer) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                             </td>
                         </tr>
                     @empty
@@ -99,6 +99,6 @@
 
     <!-- Pagination -->
     <div class="mt-6 w-full">
-        {{ $clients->links() }}
+        {{ $customers->links() }}
     </div>
 </x-layout>

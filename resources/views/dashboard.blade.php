@@ -42,18 +42,18 @@
                 <div>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Customers</p>
                     <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($totalCustomers) }}</p>
-                    <a href="{{ route('clients.index') }}" class="text-xs text-indigo-600 font-semibold hover:underline mt-1 inline-block">View directory &rarr;</a>
+                    <a href="{{ route('customers.index') }}" class="text-xs text-indigo-600 font-semibold hover:underline mt-1 inline-block">View directory &rarr;</a>
                 </div>
                 <div class="w-12 h-12 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">
                     👥
                 </div>
             </div>
 
-            <!-- Products catalog -->
+            <!-- Product catalog -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Catalog Products</p>
-                    <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($totalProducts)}}</p>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Catalog Product</p>
+                    <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($totalProduct)}}</p>
                     <p class="text-xs text-gray-400 mt-1">Total Units: <span class="font-bold text-gray-700">{{ number_format($stockStats->total_units ?? 0) }}</span></p>
                 </div>
                 <div class="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
@@ -68,15 +68,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
                     <span class="text-xs font-bold text-emerald-800 uppercase">✓ Normal Stock</span>
-                    <p class="text-2xl font-black text-emerald-700 mt-1">{{ $stockStats->normal_stock ?? 0 }} Products</p>
+                    <p class="text-2xl font-black text-emerald-700 mt-1">{{ $stockStats->normal_stock ?? 0 }} Product</p>
                 </div>
                 <div class="p-4 rounded-lg bg-amber-50 border border-amber-200">
                     <span class="text-xs font-bold text-amber-800 uppercase">⚠ Low Stock Warning</span>
-                    <p class="text-2xl font-black text-amber-700 mt-1">{{ $stockStats->low_stock ?? 0 }} Products</p>
+                    <p class="text-2xl font-black text-amber-700 mt-1">{{ $stockStats->low_stock ?? 0 }} Product</p>
                 </div>
                 <div class="p-4 rounded-lg bg-rose-50 border border-rose-200">
                     <span class="text-xs font-bold text-rose-800 uppercase">✕ Out of Stock</span>
-                    <p class="text-2xl font-black text-rose-700 mt-1">{{ $stockStats->out_of_stock ?? 0 }} Products</p>
+                    <p class="text-2xl font-black text-rose-700 mt-1">{{ $stockStats->out_of_stock ?? 0 }} Product</p>
                 </div>
             </div>
         </div>
@@ -106,39 +106,39 @@
             </div>
         </div>
 
-        <!-- 4. Tables Section (Recent Sales & Top Products) -->
+        <!-- 4. Tables Section (Recent Sales & Top Product) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- Recent Sales Table -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-base font-bold text-gray-900">Recent Transactions</h3>
-                    <a href="{{ route('ventes.index') }}" class="text-xs font-bold text-indigo-600 hover:underline">View All &rarr;</a>
+                    <a href="{{ route('sales.index') }}" class="text-xs font-bold text-indigo-600 hover:underline">View All &rarr;</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase">
                                 <th class="py-2">Reference</th>
-                                <th class="py-2">Client</th>
+                                <th class="py-2">Customer</th>
                                 <th class="py-2 text-right">Total</th>
                                 <th class="py-2 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 text-sm">
-                            @forelse($recentSales as $vente)
+                            @forelse($recentSales as $sale)
                                 <tr>
-                                    <td class="py-3 font-semibold text-gray-900">#{{ $vente->id }}</td>
-                                    <!-- ✅ FIXED: Checks client_nom snapshot first -->
+                                    <td class="py-3 font-semibold text-gray-900">#{{ $sale->id }}</td>
+                                    <!-- ✅ FIXED: Checks customer_name snapshot first -->
                                     <td class="py-3 text-gray-600">
-                                        {{ $vente->client_nom ?? $vente->client?->nom ?? 'Walk-in Customer' }}
-                                        @if(is_null($vente->client_id) && $vente->client_nom && $vente->client_nom !== 'Walk-in Customer')
+                                        {{ $sale->customer_name ?? $sale->customer?->name ?? 'Walk-in Customer' }}
+                                        @if(is_null($sale->customer_id) && $sale->customer_name && $sale->customer_name !== 'Walk-in Customer')
                                             <span class="text-[10px] text-gray-400 block">(Deleted)</span>
                                         @endif
                                     </td>
-                                    <td class="py-3 font-bold text-emerald-600 text-right">{{ number_format($vente->total, 2) }} TND</td>
+                                    <td class="py-3 font-bold text-emerald-600 text-right">{{ number_format($sale->total, 2) }} TND</td>
                                     <td class="py-3 text-right">
-                                        <a href="{{ route('ventes.show', $vente) }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-900">Details</a>
+                                        <a href="{{ route('sales.show', $sale) }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-900">Details</a>
                                     </td>
                                 </tr>
                             @empty
@@ -151,9 +151,9 @@
                 </div>
             </div>
 
-            <!-- Top Selling Products -->
+            <!-- Top Selling Product -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h3 class="text-base font-bold text-gray-900 mb-4">Top 5 Best-Selling Products</h3>
+                <h3 class="text-base font-bold text-gray-900 mb-4">Top 5 Best-Selling Product</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -164,10 +164,10 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 text-sm">
-                            @forelse($topProducts as $item)
+                            @forelse($topProduct as $item)
                                 <tr>
                                     <!-- ✅ FIXED: Reads snapshot product name directly -->
-                                    <td class="py-3 font-medium text-gray-900">{{ $item->nom_produit }}</td>
+                                    <td class="py-3 font-medium text-gray-900">{{ $item->product_name }}</td>
                                     <td class="py-3 text-center font-bold text-indigo-600">{{ $item->total_sold }}</td>
                                     <td class="py-3 font-semibold text-gray-900 text-right">{{ number_format($item->total_revenue, 2) }} TND</td>
                                 </tr>
@@ -184,14 +184,14 @@
         </div>
 
         <!-- 5. Low Stock / Critical Inventory Alert Table -->
-        @if($criticalStockProducts->isNotEmpty())
+        @if($criticalStockProduct->isNotEmpty())
             <div class="bg-rose-50 border border-rose-200 rounded-xl p-6">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <h3 class="text-base font-bold text-rose-900 flex items-center gap-2">
                             <span>⚠</span> Inventory Action Required
                         </h3>
-                        <p class="text-xs text-rose-700">Products that have hit or dropped below their designated alert threshold.</p>
+                        <p class="text-xs text-rose-700">Product that have hit or dropped below their designated alert threshold.</p>
                     </div>
                     <a href="{{ route('stock.index') }}" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition">
                         Manage Inventory &rarr;
@@ -208,14 +208,14 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-rose-100 text-sm">
-                            @foreach($criticalStockProducts as $product)
+                            @foreach($criticalStockProduct as $product)
                                 <tr>
-                                    <td class="py-3 px-4 font-semibold text-gray-900">{{ $product->nom ?? $product->name }}</td>
+                                    <td class="py-3 px-4 font-semibold text-gray-900">{{ $product->name ?? $product->name }}</td>
                                     <!-- ✅ FIXED: Changed quantity to stock -->
                                     <td class="py-3 px-4 text-center font-bold {{ $product->stock <= 0 ? 'text-rose-600' : 'text-amber-600' }}">
                                         {{ $product->stock }}
                                     </td>
-                                    <td class="py-3 px-4 text-center text-gray-500">{{ $product->seuil_alerte }}</td>
+                                    <td class="py-3 px-4 text-center text-gray-500">{{ $product->alert_threshold }}</td>
                                     <td class="py-3 px-4 text-right">
                                         @if($product->stock <= 0)
                                             <span class="px-2 py-0.5 text-xs font-extrabold bg-rose-100 text-rose-700 rounded">Out of Stock</span>

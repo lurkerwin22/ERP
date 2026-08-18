@@ -4,16 +4,16 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Sales</h1>
-                <p class="text-sm text-gray-500">Track client orders, sales totals, and order statuses.</p>
+                <p class="text-sm text-gray-500">Track customer orders, sales totals, and order statuses.</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Search Form -->
-                <form action="{{ route('ventes.index') }}" method="GET" class="flex items-center gap-2">
+                <form action="{{ route('sales.index') }}" method="GET" class="flex items-center gap-2">
                     <input 
                         type="text" 
                         name="search" 
-                        placeholder="Search sale ID or client..." 
+                        placeholder="Search sale ID or customer..." 
                         value="{{ request('search') }}" 
                         class="px-3.5 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-60"
                     />
@@ -21,14 +21,14 @@
                         Search
                     </button>
                     @if(request('search'))
-                        <a href="{{ route('ventes.index') }}" class="text-sm text-gray-500 hover:text-gray-700 underline px-1">
+                        <a href="{{ route('sales.index') }}" class="text-sm text-gray-500 hover:text-gray-700 underline px-1">
                             Clear
                         </a>
                     @endif
                 </form>
 
                 <!-- New Sale Button -->
-                <a href="{{ route('ventes.create') }}" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors whitespace-nowrap">
+                <a href="{{ route('sales.create') }}" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors whitespace-nowrap">
                     + New Sale
                 </a>
             </div>
@@ -63,22 +63,22 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
-                    @forelse($ventes as $vente)
+                    @forelse($sales as $sale)
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                #{{ $vente->id }}
+                                #{{ $sale->id }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-800">
-                                {{ $vente->client_nom ?? optional($vente->client)->nom ?? 'Walk-in Customer' }}
-                                @if(is_null($vente->client_id) && $vente->client_nom && $vente->client_nom !== 'Walk-in Customer')
+                                {{ $sale->customer_name ?? optional($sale->customer)->name ?? 'Walk-in Customer' }}
+                                @if(is_null($sale->customer_id) && $sale->customer_name && $sale->customer_name !== 'Walk-in Customer')
                                     <span class="text-xs text-gray-400 block">(Deleted Customer)</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($vente->date_vente)->format('M d, Y H:i') }}
+                                {{ \Carbon\Carbon::parse($sale->sale_date)->format('M d, Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($vente->statut === 'completee')
+                                @if($sale->status === 'completed')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         Completed
                                     </span>
@@ -89,10 +89,10 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                {{ number_format($vente->total, 2) }} TND
+                                {{ number_format($sale->total, 2) }} TND
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ route('ventes.show', $vente) }}" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                <a href="{{ route('sales.show', $sale) }}" class="text-indigo-600 hover:text-indigo-900">View</a>
                             </td>
                         </tr>
                     @empty
@@ -109,6 +109,6 @@
 
     <!-- Pagination -->
     <div class="mt-6 w-full">
-        {{ $ventes->links() }}
+        {{ $sales->links() }}
     </div>
 </x-layout>

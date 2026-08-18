@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Create New Sale</h1>
             <p class="text-sm text-gray-500">Select customer and add products to the order.</p>
         </div>
-        <a href="{{ route('ventes.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Sales</a>
+        <a href="{{ route('sales.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Sales</a>
     </div>
 
     @if($errors->has('stock'))
@@ -13,14 +13,14 @@
         </div>
     @endif
 
-    <form action="{{ route('ventes.store') }}" method="POST" id="sale-form">
+    <form action="{{ route('sales.store') }}" method="POST" id="sale-form">
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Left Column: Order Items -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h2 class="text-lg font-bold text-gray-900 mb-4">Select Products</h2>
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Select Product</h2>
 
                     <!-- Product Picker Bar -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
@@ -28,12 +28,12 @@
                             <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Product</label>
                             <select id="product-select" class="w-full text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">-- Choose a product --</option>
-                                @foreach($produits as $produit)
-                                    <option value="{{ $produit->id }}" 
-                                            data-name="{{ $produit->name ?? $produit->nom }}" 
-                                            data-price="{{ $produit->prix }}" 
-                                            data-stock="{{ $produit->stock }}">
-                                        {{ $produit->name ?? $produit->nom }} ({{ number_format($produit->prix, 2) }} TND | Stock: {{ $produit->stock }})
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}" 
+                                            data-name="{{ $product->name ?? $product->name }}" 
+                                            data-price="{{ $product->price }}" 
+                                            data-stock="{{ $product->stock }}">
+                                        {{ $product->name ?? $product->name }} ({{ number_format($product->price, 2) }} TND | Stock: {{ $product->stock }})
                                     </option>
                                 @endforeach
                             </select>
@@ -76,11 +76,11 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Customer</label>
-                        <select name="client_id" class="w-full text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <select name="customer_id" class="w-full text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">Walk-in Customer (General)</option>
-                            @foreach($clients as $client)
-                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                    {{ $client->nom }} ({{ $client->telephone }})
+                            @foreach($customers as $customer)
+                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->name }} ({{ $customer->phone }})
                                 </option>
                             @endforeach
                         </select>
@@ -150,7 +150,7 @@
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">${price.toFixed(2)} TND</td>
                     <td class="px-4 py-3 text-sm">
-                        <input type="number" name="items[${itemIndex}][quantite]" value="1" min="1" max="${stock}" 
+                        <input type="number" name="items[${itemIndex}][quantity]" value="1" min="1" max="${stock}" 
                             class="qty-input w-20 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:ring-indigo-500 focus:border-indigo-500">
                     </td>
                     <td class="px-4 py-3 text-right text-sm font-bold text-gray-900 subtotal-cell">${price.toFixed(2)} TND</td>

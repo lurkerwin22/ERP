@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,7 @@ class StockController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Products::query();
+        $query = Product::query();
 
         // 1. Search Filter
         if ($request->filled('search')) {
@@ -33,9 +33,9 @@ class StockController extends Controller
                 $query->where('stock', '<=', 0);
             } elseif ($status === 'low_stock') {
                 $query->where('stock', '>', 0)
-                      ->whereColumn('stock', '<=', 'seuil_alerte');
+                      ->whereColumn('stock', '<=', 'alert_threshold');
             } elseif ($status === 'normal') {
-                $query->whereColumn('stock', '>', 'seuil_alerte');
+                $query->whereColumn('stock', '>', 'alert_threshold');
             }
         }
 
@@ -52,7 +52,7 @@ class StockController extends Controller
                 $query->orderByRaw("
                     CASE 
                         WHEN stock <= 0 THEN 0 
-                        WHEN stock <= seuil_alerte THEN 1 
+                        WHEN stock <= alert_threshold THEN 1 
                         ELSE 2 
                     END {$direction}
                 ");
@@ -72,7 +72,7 @@ class StockController extends Controller
     /**
      * Step 8: Display movement history for a product
      */
-    public function movements(Products $product)
+    public function movements(Product $product)
     {
         $movements = $product->stockMovements()->latest()->get();
         return view('stock.movements', compact('product', 'movements'));
@@ -81,7 +81,7 @@ class StockController extends Controller
     /**
      * Show page to adjust stock
      */
-    public function adjust(Products $product)
+    public function adjust(Product $product)
     {
         return view('stock.adjust', compact('product'));
     }
@@ -89,7 +89,7 @@ class StockController extends Controller
     /**
      * Step 6: Add Stock (+)
      */
-    public function addStock(Request $request, Products $product)
+    public function addStock(Request $request, Product $product)
     {
         $request->validate([
             'quantity' => 'required|integer|min:1',
@@ -100,7 +100,7 @@ class StockController extends Controller
             $product->increment('stock', $request->quantity);
 
             StockMovement::create([
-                'product_id' => $product->id, // or 'produit_id' depending on your migration column
+                'product_id' => $product->id, // or 'product_id' depending on your migration column
                 'type'       => 'in',
                 'quantity'   => $request->quantity,
                 'reason'     => $request->reason ?? 'Purchase/Restock',
@@ -113,7 +113,7 @@ class StockController extends Controller
     /**
      * Step 7: Remove Stock (-)
      */
-    public function removeStock(Request $request, Products $product)
+    public function removeStock(Request $request, Product $product)
     {
         $request->validate([
             'quantity' => 'required|integer|min:1',
@@ -130,7 +130,7 @@ class StockController extends Controller
             $product->decrement('stock', $request->quantity);
 
             StockMovement::create([
-                'product_id' => $product->id, // or 'produit_id' depending on your migration column
+                'product_id' => $product->id, // or 'product_id' depending on your migration column
                 'type'       => 'out',
                 'quantity'   => $request->quantity,
                 'reason'     => $request->reason ?? 'Sale/Reduction',

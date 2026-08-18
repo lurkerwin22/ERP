@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('clients', function (Blueprint $table) {
+        Schema::create('customers', function (Blueprint $table) {
             $table->id();
             
-            // Core Customer fields matching your class diagram & requirements
-            $table->string('nom');
+            // Core Customer fields matching the class diagram and requirements
+            $table->string('name');
             $table->string('email')->unique();
-            $table->string('telephone');
-            $table->string('adresse')->nullable();
-            $table->string('ville')->nullable();
+            $table->string('phone');
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
             $table->text('notes')->nullable();
 
             $table->timestamps();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('clients');
+        Schema::dropIfExists('customers');
     }
 };

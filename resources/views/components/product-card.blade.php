@@ -32,7 +32,7 @@
             </div>
             
             <div class="px-3 py-1 border border-blue-500 text-blue-600 text-sm font-medium rounded">
-                ${{ number_format($product->prix ?? 0, 2) }}
+                ${{ number_format($product->price ?? 0, 2) }}
             </div>
         </div>
 
@@ -43,7 +43,7 @@
                     <span class="font-medium">stock:</span> {{ $product->stock ?? 0 }}
                 </div>
                 <div>
-                    <span class="font-medium">seuil d'alerte:</span> {{ $product->seuil_alerte ?? 0 }}
+                    <span class="font-medium">seuil d'alerte:</span> {{ $product->alert_threshold ?? 0 }}
                 </div>
             </div>
 

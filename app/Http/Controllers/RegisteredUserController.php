@@ -7,7 +7,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
-class RegistredUserController extends Controller
+class RegisteredUserController extends Controller
 {
     public function create()
     {

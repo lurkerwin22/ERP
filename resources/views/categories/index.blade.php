@@ -22,8 +22,8 @@
 
     <!-- 3-Column Responsive Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @forelse ($categories as $categorie)
-            <x-category-card :categorie="$categorie" />
+        @forelse ($categories as $category)
+            <x-category-card :category="$category" />
         @empty
             <div class="col-span-full text-center py-12 bg-white rounded-lg border border-gray-200 text-gray-500">
                 No categories found.

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Client extends Model
+class Customer extends Model
 {
     use HasFactory;
 
@@ -13,21 +13,21 @@ class Client extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'nom',
+        'name',
         'email',
-        'telephone',
-        'adresse',
-        'ville',
+        'phone',
+        'address',
+        'city',
         'notes',
     ];
 
     /**
-     * Relationship: One Client has many Ventes (Sales).
+     * Relationship: One Customer has many Sales.
      * Ready for when we build the Sales feature later!
      */
-    public function ventes()
+    public function sales()
     {
-        // Using 'client_id' as the foreign key in the upcoming 'ventes' table
-        return $this->hasMany(Vente::class, 'client_id');
+        // Using 'customer_id' as the foreign key in the upcoming 'sales' table
+        return $this->hasMany(Sale::class, 'customer_id');
     }
 }

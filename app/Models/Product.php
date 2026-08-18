@@ -5,21 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Products extends Model
+class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductsFactory> */
+    /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
     protected $fillable = [
         'name',
         'description',
         'image',
-        'prix',
+        'price',
         'stock',
-        'seuil_alerte',
-        'categorie_id',
+        'alert_threshold',
+        'category_id',
     ];  
     public function category(){
-        return $this->belongsTo(Categorie::class, 'categorie_id');
+        return $this->belongsTo(Category::class, 'category_id');
     }
     public function stockMovements()
     {

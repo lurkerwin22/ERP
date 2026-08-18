@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Categorie;
 
 return new class extends Migration
 {
@@ -17,10 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable(); // <-- Make sure it's nullable and named 'image'
-            $table->decimal('prix', 10, 2);
+            $table->decimal('price', 10, 2);
             $table->integer('stock')->default(0);
-            $table->integer('seuil_alerte')->default(0);
-            $table->foreignId('categorie_id')->nullable()->constrained('categories')->nullOnDelete();
+            $table->integer('alert_threshold')->default(0);
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->timestamps();
         });
     }
