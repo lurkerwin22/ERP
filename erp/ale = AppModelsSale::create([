@@ -1,0 +1,12 @@
+[90m= [39m[34;4mApp\Models\Product[39;24m {#8784
+    [34mid[39m: [35m1[39m,
+    [34mname[39m: [32m"[39m[32mest[39m[32m"[39m,
+    [34mdescription[39m: [32m"[39m[32mMinus perferendis voluptatibus vero dicta et qui vitae.[39m[32m"[39m,
+    [34mimage[39m: [32m"[39m[32mhttps://picsum.photos/100[39m[32m"[39m,
+    [34mprice[39m: [35m41.22[39m,
+    [34mstock[39m: [35m89[39m,
+    [34malert_threshold[39m: [35m8[39m,
+    [34mcategory_id[39m: [35m1[39m,
+    [34mcreated_at[39m: [32m"[39m[32m2026-08-17 14:52:27[39m[32m"[39m,
+    [34mupdated_at[39m: [32m"[39m[32m2026-08-17 14:52:27[39m[32m"[39m,
+  }
