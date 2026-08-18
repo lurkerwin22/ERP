@@ -34,6 +34,7 @@
     </div>
 
     <div class="invoice-container max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-xl shadow-sm border border-gray-200">
+        <!-- Header -->
         <div class="flex justify-between items-start border-b pb-8">
             <div>
                 <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">INVOICE</h2>
@@ -46,6 +47,7 @@
             </div>
         </div>
 
+        <!-- Billed To / Details -->
         <div class="grid grid-cols-2 gap-8 my-8">
             <div>
                 <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Billed To</h4>
@@ -62,10 +64,16 @@
             <div class="text-right">
                 <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Invoice Details</h4>
                 <p class="text-sm text-gray-600"><span class="font-semibold text-gray-800">Date:</span> {{ $sale->created_at->format('d/m/Y') }}</p>
-                <p class="text-sm text-gray-600"><span class="font-semibold text-gray-800">Status:</span> {{ ucfirst($sale->status) }}</p>
+                <p class="text-sm text-gray-600">
+                    <span class="font-semibold text-gray-800">Payment Status:</span> 
+                    <span class="uppercase font-bold {{ $sale->payment_status === 'paid' ? 'text-green-600' : 'text-amber-600' }}">
+                        {{ $sale->status === 'cancelled' ? 'CANCELLED' : $sale->payment_status }}
+                    </span>
+                </p>
             </div>
         </div>
 
+        <!-- Line Items Table -->
         <div class="overflow-x-auto my-6">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -80,7 +88,6 @@
                     @foreach($sale->saleItems as $item)
                         <tr>
                             <td class="py-4 px-4 text-sm font-medium text-gray-900">
-                                <!-- Product Snapshot -->
                                 {{ $item->product_name }}
                             </td>
                             <td class="py-4 px-4 text-sm text-gray-700 text-center">{{ $item->quantity }}</td>
@@ -92,15 +99,50 @@
             </table>
         </div>
 
-        <div class="flex justify-end border-t pt-6">
-            <div class="w-full md:w-1/2 space-y-2">
+        <!-- Ledger & Totals Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t pt-6">
+            <!-- Left: Payment History Ledger -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Payment Log</h4>
+                @if($sale->payments->isEmpty())
+                    <p class="text-xs text-gray-400 italic">No payments recorded for this invoice yet.</p>
+                @else
+                    <table class="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="p-2 text-left text-gray-600">Date</th>
+                                <th class="p-2 text-left text-gray-600">Method</th>
+                                <th class="p-2 text-right text-gray-600">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($sale->payments as $payment)
+                                <tr>
+                                    <td class="p-2 text-gray-700">{{ $payment->paid_at ? $payment->paid_at->format('d/m/Y') : $payment->created_at->format('d/m/Y') }}</td>
+                                    <td class="p-2 capitalize text-gray-600">{{ str_replace('_', ' ', $payment->payment_method) }}</td>
+                                    <td class="p-2 text-right font-bold text-gray-900">{{ number_format($payment->amount, 2) }} TND</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+
+            <!-- Right: Calculations Summary -->
+            <div class="space-y-3 bg-gray-50 p-5 rounded-xl border border-gray-200">
                 <div class="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal:</span>
-                    <span class="font-semibold">{{ number_format($sale->total, 2) }} TND</span>
+                    <span>Subtotal / Total:</span>
+                    <span class="font-bold text-gray-900">{{ number_format($sale->total, 2) }} TND</span>
                 </div>
-                <div class="flex justify-between text-lg font-bold text-gray-900 border-t pt-2">
-                    <span>Total Due:</span>
-                    <span class="text-indigo-600">{{ number_format($sale->total, 2) }} TND</span>
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>Total Paid:</span>
+                    <span class="font-bold text-green-600">{{ number_format($sale->amount_paid, 2) }} TND</span>
+                </div>
+                <div class="flex justify-between text-base font-bold text-gray-900 border-t pt-3">
+                    <span>Balance Due:</span>
+                    <span class="{{ $sale->remaining_amount > 0 ? 'text-red-600' : 'text-gray-900' }}">
+                        {{ number_format($sale->remaining_amount, 2) }} TND
+                    </span>
                 </div>
             </div>
         </div>

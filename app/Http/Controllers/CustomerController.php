@@ -60,6 +60,10 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
+        $customer->load(['sales' => function ($query) {
+            $query->where('status', '!=', 'cancelled')->with('payments');
+        }]);
+
         return view('customers.show', compact('customer'));
     }
 

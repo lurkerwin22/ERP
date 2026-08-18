@@ -44,17 +44,24 @@ class SaleController extends Controller
     }
     public function show(Sale $sale)
     {
-        // Safe loading (doesn't throw if relationships are null)
-        $sale->load(['customer', 'saleItems.product']);
+        // Eager load customer, items, products, and payment history
+        $sale->load(['customer', 'saleItems.product', 'payments']);
 
         return view('sales.show', compact('sale'));
     }
 
     public function invoice(Sale $sale)
     {
-        $sale->load(['customer', 'saleItems.product']);
+        $sale->load(['customer', 'saleItems.product', 'payments']);
 
         return view('sales.invoice', compact('sale'));
+    }
+
+    public function receipt(Sale $sale)
+    {
+        $sale->load(['customer', 'saleItems.product', 'payments']);
+
+        return view('sales.receipt', compact('sale'));
     }
 
     public function store(Request $request)
@@ -107,12 +114,7 @@ class SaleController extends Controller
         return redirect()->route('sales.index')
             ->with('success', 'Sale saved successfully.');
     }
-    public function receipt(Sale $sale)
-    {
-        $sale->load(['customer', 'saleItems.product']);
-        return view('sales.receipt', compact('sale'));
-    }
-
+    
     /**
      * Cancel a completed sale and safely restore stock if products still exist.
      */

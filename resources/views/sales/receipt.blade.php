@@ -32,13 +32,12 @@
             ← Back to Sale
         </a>
         
-        <!-- Reusing your custom Form Button component -->
         <x-forms.button type="button" onclick="window.print()">
             🖨️ Print Receipt
         </x-forms.button>
     </div>
 
-    <!-- Printable Container using your custom Panel component -->
+    <!-- Printable Container -->
     <x-panel class="receipt-panel max-w-md mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
         <!-- Receipt Header -->
         <div class="text-center pb-4 border-b border-dashed border-gray-300">
@@ -59,7 +58,7 @@
             </div>
             <div class="flex justify-between">
                 <span class="text-gray-500">Customer:</span>
-                <span class="font-medium text-gray-800">{{ $sale->customer->name ?? 'Guest / General Customer' }}</span>
+                <span class="font-medium text-gray-800">{{ $sale->customer_name ?? optional($sale->customer)->name ?? 'Walk-in Customer' }}</span>
             </div>
         </div>
 
@@ -77,33 +76,57 @@
                 <tbody class="divide-y divide-gray-100">
                     @foreach($sale->saleItems as $item)
                         <tr>
-                            <td class="py-2 font-medium text-gray-800">{{ $item->product->name ?? 'Product #'.$item->product_id }}</td>
+                            <td class="py-2 font-medium text-gray-800">{{ $item->product_name }}</td>
                             <td class="py-2 text-center text-gray-600">{{ $item->quantity }}</td>
                             <td class="py-2 text-right text-gray-600">{{ number_format($item->unit_price, 2) }} TND</td>
-                            <td class="py-2 text-right font-medium text-gray-800">{{ number_format($item->subtotal ?? ($item->quantity * $item->unit_price), 2) }} TND</td>
+                            <td class="py-2 text-right font-medium text-gray-800">{{ number_format($item->subtotal, 2) }} TND</td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
 
-        <!-- Payment Breakdown -->
+        <!-- Financial Summary -->
         <div class="py-4 space-y-2 text-xs border-b border-dashed border-gray-300">
-            <div class="flex justify-between text-sm font-semibold text-gray-900">
+            <div class="flex justify-between text-sm font-bold text-gray-900">
                 <span>Total Amount:</span>
                 <span>{{ number_format($sale->total, 2) }} TND</span>
             </div>
             <div class="flex justify-between text-gray-600">
                 <span>Amount Paid:</span>
-                <span class="text-green-600 font-medium">{{ number_format($sale->paid ?? $sale->total, 2) }} TND</span>
+                <span class="text-green-600 font-bold">{{ number_format($sale->amount_paid, 2) }} TND</span>
             </div>
             <div class="flex justify-between text-gray-600">
                 <span>Remaining Balance:</span>
-                <span class="{{ ($sale->remaining ?? 0) > 0 ? 'text-red-600 font-medium' : 'text-gray-800' }}">
-                    {{ number_format($sale->remaining ?? 0, 2) }} TND
+                <span class="{{ $sale->remaining_amount > 0 ? 'text-red-600 font-bold' : 'text-gray-800 font-medium' }}">
+                    {{ number_format($sale->remaining_amount, 2) }} TND
+                </span>
+            </div>
+            <div class="flex justify-between text-gray-600 pt-1">
+                <span>Status:</span>
+                <span class="font-bold uppercase text-gray-900">
+                    {{ $sale->status === 'cancelled' ? 'CANCELLED' : $sale->payment_status }}
                 </span>
             </div>
         </div>
+
+        <!-- Payment History Breakdown -->
+        @if($sale->payments->isNotEmpty())
+            <div class="py-4 border-b border-dashed border-gray-300 text-xs">
+                <span class="font-bold text-gray-700 block mb-2">Payments Received:</span>
+                <div class="space-y-1">
+                    @foreach($sale->payments as $payment)
+                        <div class="flex justify-between text-gray-600">
+                            <span>
+                                {{ $payment->paid_at ? $payment->paid_at->format('d/m/Y') : $payment->created_at->format('d/m/Y') }} 
+                                ({{ ucfirst($payment->payment_method) }})
+                            </span>
+                            <span class="font-medium text-gray-800">{{ number_format($payment->amount, 2) }} TND</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         <!-- Footer -->
         <div class="pt-4 text-center">

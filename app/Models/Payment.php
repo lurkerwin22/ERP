@@ -1,47 +1,40 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Sale extends Model
+class Payment extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'customer_id',
-        'customer_name',
-        'customer_phone',
-        'customer_address',
-        'sale_date',
-        'total',
-        'status',
-        'notes',
+        'sale_id',
+        'amount',
+        'payment_method',
+        'paid_at',
     ];
 
     protected $casts = [
-        'total' => 'decimal:2',
-        'sale_date' => 'datetime',
+        'paid_at' => 'datetime',
+        'amount' => 'decimal:2',
     ];
 
-    // Relationships
-    public function saleItems()
+    public function sale(): BelongsTo
     {
-        return $this->hasMany(SaleItem::class, 'sale_id');
+        return $this->belongsTo(Sale::class, 'sale_id');
     }
-
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
-
-    public function payments()
+    
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'sale_id');
     }
 
-    // Calculated Financial Attributes
+    // 2. Add Accessors for derived values
     public function getAmountPaidAttribute(): float
     {
-        // Uses loaded relation if present to prevent redundant database queries
+        // Sum loaded payments in memory if relationship is loaded to avoid extra queries
         return (float) $this->payments->sum('amount');
     }
 
@@ -52,10 +45,6 @@ class Sale extends Model
 
     public function getPaymentStatusAttribute(): string
     {
-        if ($this->status === 'cancelled') {
-            return 'cancelled';
-        }
-
         if ($this->amount_paid <= 0) {
             return 'unpaid';
         }

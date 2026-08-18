@@ -25,9 +25,27 @@ class Customer extends Model
      * Relationship: One Customer has many Sales.
      * Ready for when we build the Sales feature later!
      */
+   
+    
     public function sales()
     {
-        // Using 'customer_id' as the foreign key in the upcoming 'sales' table
         return $this->hasMany(Sale::class, 'customer_id');
+    }
+
+    // Calculate customer-level aggregates
+    public function getTotalPurchasesAttribute(): float
+    {
+        return (float) $this->sales->where('status', '!=', 'cancelled')->sum('total');
+    }
+
+    public function getTotalPaidAttribute(): float
+    {
+        return (float) $this->sales->where('status', '!=', 'cancelled')
+            ->sum(fn ($sale) => $sale->amount_paid);
+    }
+
+    public function getTotalOutstandingDebtAttribute(): float
+    {
+        return max(0, $this->total_purchases - $this->total_paid);
     }
 }
