@@ -1,24 +1,61 @@
 <x-layout>
-    @if (session('success'))
-        <div class="mb-4 p-4 text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
+    <!-- CSS Rules to print ONLY the Quote Invoice document -->
+    <style>
+        @media print {
+            /* Hide top bar, flash messages, navigation, and page chrome */
+            body * {
+                visibility: hidden !important;
+            }
 
-    @if (session('error'))
-        <div class="mb-4 p-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg">
-            {{ session('error') }}
-        </div>
-    @endif
+            /* Make only the quote card and its contents visible */
+            #printable-quote, #printable-quote * {
+                visibility: visible !important;
+            }
+
+            /* Position the quote card at the very top of the printed page */
+            #printable-quote {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 1.5rem !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+            }
+
+            /* Explicitly hide non-printable UI controls */
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <!-- Flash Notification Alerts -->
+    <div class="max-w-4xl mx-auto no-print">
+        @if (session('success'))
+            <div class="mb-4 p-4 text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="mb-4 p-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg">
+                {{ session('error') }}
+            </div>
+        @endif
+    </div>
+
     <div class="max-w-4xl mx-auto space-y-6">
         <!-- Top Navigation & Action Bar -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 no-print">
             <div>
                 <a href="{{ route('quotes.index') }}" class="text-xs font-medium text-gray-500 hover:text-gray-800 transition">
                     ← Back to All Quotes
                 </a>
                 <h1 class="text-2xl font-bold text-gray-900 mt-1">
-                    Quote #{{ $quote->reference ?? $quote->id }}
+                    Quote #{{ $quote->quote_number ?? $quote->reference ?? $quote->id }}
                 </h1>
             </div>
 
@@ -39,7 +76,7 @@
                     {{ ucfirst($quote->status) }}
                 </span>
 
-                @if($quote->status !== 'converted')
+                @if($quote->status !== 'accepted' && $quote->status !== 'converted')
                     <form action="{{ route('quotes.convert', $quote->id) }}" method="POST" onsubmit="return confirm('Convert this quote into an official sale? This will deduct stock for the items.');">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 transition">
@@ -54,8 +91,8 @@
             </div>
         </div>
 
-        <!-- Main Invoice/Quote Document Card -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 space-y-8 print:border-none print:shadow-none">
+        <!-- Main Invoice/Quote Document Card (Only this div prints) -->
+        <div id="printable-quote" class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 space-y-8 print:border-none print:shadow-none">
             
             <!-- Document Header -->
             <div class="flex justify-between items-start border-b border-gray-100 pb-6">
@@ -70,7 +107,7 @@
                 <div class="text-right">
                     <span class="text-xs text-gray-400 uppercase font-semibold block">Total Amount</span>
                     <span class="text-3xl font-extrabold text-indigo-600">
-                        {{ number_format($quote->total_amount ?? $quote->items->sum(fn($i) => $i->quantity * $i->unit_price), 2) }} TND
+                        {{ number_format($quote->total ?? $quote->total_amount ?? $quote->items->sum(fn($i) => $i->quantity * $i->unit_price), 2) }} TND
                     </span>
                 </div>
             </div>
@@ -90,7 +127,7 @@
 
                 <div class="md:text-right">
                     <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block mb-1">Quote Reference</span>
-                    <p class="text-sm font-mono font-medium text-gray-800">#{{ $quote->reference ?? $quote->id }}</p>
+                    <p class="text-sm font-mono font-medium text-gray-800">#{{ $quote->quote_number ?? $quote->reference ?? $quote->id }}</p>
                     <p class="text-xs text-gray-500 mt-0.5">Created by: {{ $quote->user->name ?? 'System' }}</p>
                 </div>
             </div>
@@ -142,7 +179,7 @@
                     </div>
                     <div class="border-t border-gray-200 pt-2 flex justify-between font-bold text-gray-900 text-base">
                         <span>Total:</span>
-                        <span class="text-indigo-600">{{ number_format($quote->total_amount ?? $quote->items->sum(fn($i) => $i->quantity * $i->unit_price), 2) }} TND</span>
+                        <span class="text-indigo-600">{{ number_format($quote->total ?? $quote->total_amount ?? $quote->items->sum(fn($i) => $i->quantity * $i->unit_price), 2) }} TND</span>
                     </div>
                 </div>
             </div>
