@@ -14,6 +14,10 @@
             class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
                 📄 View / Print Invoice
             </a>
+            <a href="{{ route('sales.receipt', $sale) }}" 
+            class="inline-flex items-center px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium rounded-md transition border border-indigo-200">
+                🧾 Receipt
+            </a>
 
             @if($sale->status === 'completed')
                 <form method="POST"

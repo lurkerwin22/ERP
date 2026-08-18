@@ -146,5 +146,6 @@ Route::middleware('auth')->group(function (){
     Route::resource('sales', SaleController::class);
     Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])
         ->name('sales.cancel');
+    Route::get('/sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
     Route::get('sales/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
 });

@@ -107,6 +107,11 @@ class SaleController extends Controller
         return redirect()->route('sales.index')
             ->with('success', 'Sale saved successfully.');
     }
+    public function receipt(Sale $sale)
+    {
+        $sale->load(['customer', 'saleItems.product']);
+        return view('sales.receipt', compact('sale'));
+    }
 
     /**
      * Cancel a completed sale and safely restore stock if products still exist.
