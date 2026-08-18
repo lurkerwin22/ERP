@@ -32,7 +32,7 @@
             </div>
             
             <div class="px-3 py-1 border border-blue-500 text-blue-600 text-sm font-medium rounded">
-                ${{ number_format($product->price ?? 0, 2) }}
+                {{ number_format($product->price ?? 0, 2) }} TND
             </div>
         </div>
 
