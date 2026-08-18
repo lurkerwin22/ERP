@@ -9,6 +9,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\QuoteController;
 
 
 Route::middleware(['auth'])->group(function () {
@@ -148,4 +149,12 @@ Route::middleware('auth')->group(function (){
         ->name('sales.cancel');
     Route::get('/sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
     Route::get('sales/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
+});
+Route::middleware(['auth'])->group(function () {
+    // Quote Resource Routes
+    Route::resource('quotes', QuoteController::class);
+
+    // Status & Conversion Actions
+    Route::post('/quotes/{quote}/convert', [QuoteController::class, 'convert'])->name('quotes.convert');
+    Route::patch('/quotes/{quote}/status', [QuoteController::class, 'updateStatus'])->name('quotes.update-status');
 });
