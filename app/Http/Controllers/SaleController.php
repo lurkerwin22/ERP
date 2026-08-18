@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\Customer;
 use App\Models\Product;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +42,7 @@ class SaleController extends Controller
 
         return view('sales.create', compact('customers', 'products'));
     }
-public function show(Sale $sale)
+    public function show(Sale $sale)
     {
         // Safe loading (doesn't throw if relationships are null)
         $sale->load(['customer', 'saleItems.product']);
@@ -112,22 +113,27 @@ public function show(Sale $sale)
      */
     public function cancel(Sale $sale)
     {
+        // Prevent cancelling twice
         if ($sale->status === 'cancelled') {
-            return back()->with('error', 'Sale is already cancelled.');
+            return back()->with('error', 'This sale is already cancelled.');
         }
 
-        DB::transaction(function () use ($sale) {
-            foreach ($sale->saleItems as $item) {
-                // Only restore stock if product still exists in catalog
-                if ($item->product_id && $item->product) {
-                    $item->product->increment('stock', $item->quantity);
+        foreach ($sale->saleItems as $item) {
+            if ($item->product_id) {
+                $product = Product::find($item->product_id);
+
+                if ($product) {
+                    $product->increment('stock', $item->quantity);
                 }
             }
+        }
 
-            $sale->update(['status' => 'cancelled']);
-        });
+        $sale->update([
+            'status' => 'cancelled',
+        ]);
 
-        return redirect()->route('sales.show', $sale)
-            ->with('success', 'Sale cancelled successfully.');
+        return redirect()
+            ->route('sales.show', $sale)
+            ->with('success', 'Sale cancelled and stock restored successfully.');
     }
 }

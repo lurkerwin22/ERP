@@ -5,12 +5,29 @@
             <p class="text-sm text-gray-500">Recorded on {{ $sale->created_at->format('d/m/Y H:i') }}</p>
         </div>
         <div class="flex space-x-3">
-            <a href="{{ route('sales.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
+            <a href="{{ route('sales.index') }}"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
                 &larr; Back to Sales
             </a>
-            <a href="{{ route('sales.invoice', $sale) }}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
+
+            <a href="{{ route('sales.invoice', $sale) }}"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
                 📄 View / Print Invoice
             </a>
+
+            @if($sale->status === 'completed')
+                <form method="POST"
+                    action="{{ route('sales.cancel', $sale) }}"
+                    onsubmit="return confirm('Are you sure you want to cancel this sale and restore the stock?');">
+                    @csrf
+                    @method('PATCH')
+
+                    <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg shadow-sm hover:bg-red-700">
+                        ↩ Cancel & Restock
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 
