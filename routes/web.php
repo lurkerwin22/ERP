@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\AiAssistantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SessionController;
@@ -87,5 +88,9 @@ Route::middleware(['auth'])->group(function () {
 
     //Debt 
     Route::get('/debts', [DebtController::class, 'index'])->name('debts.index');
+
+    // AI Assistant
+    Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.assistant');
+    Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai.assistant.chat');
 
 });

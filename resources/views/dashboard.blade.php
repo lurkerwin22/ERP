@@ -62,6 +62,46 @@
             </div>
         </div>
 
+        <!-- 🤖 ======================================================== -->
+        <!-- NEW: AI PROACTIVE INSIGHTS ALERT BOX                        -->
+        <!-- ======================================================== -->
+        @if(!empty($aiAlerts) && ($aiAlerts['low_stock_count'] > 0 || $aiAlerts['high_debt_customers'] > 0))
+            <div class="bg-gradient-to-r from-amber-50 via-amber-50/80 to-indigo-50/50 border border-amber-200/80 rounded-xl p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center text-base shadow-sm">
+                            🤖
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-amber-950">Points d'attention détectés par l'IA</h3>
+                            <p class="text-xs text-amber-700">Analyse automatique en temps réel de votre activité ERP</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('ai.assistant') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-indigo-100 shadow-2xs hover:shadow-xs transition">
+                        <span>Consulter l'assistant</span>
+                        <span>&rarr;</span>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-amber-200/50">
+                    @if($aiAlerts['low_stock_count'] > 0)
+                        <div class="flex items-center space-x-2 text-xs text-amber-900 bg-white/70 p-2.5 rounded-lg border border-amber-100">
+                            <span class="text-rose-500 font-bold">⚠️</span>
+                            <span><strong>{{ $aiAlerts['low_stock_count'] }} produit(s)</strong> risquent une rupture de stock imminente.</span>
+                        </div>
+                    @endif
+
+                    @if($aiAlerts['high_debt_customers'] > 0)
+                        <div class="flex items-center space-x-2 text-xs text-amber-900 bg-white/70 p-2.5 rounded-lg border border-amber-100">
+                            <span class="text-amber-600 font-bold">💳</span>
+                            <span><strong>{{ $aiAlerts['high_debt_customers'] }} client(s)</strong> ont des solde(s) débiteur(s) à relancer.</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
+        <!-- ======================================================== -->
+
         <!-- 2. Stock Health Overview Bar -->
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">Inventory Health Status</h2>

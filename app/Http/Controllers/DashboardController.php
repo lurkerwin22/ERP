@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\SaleItem;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Services\Ai\AiAssistantService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -78,6 +79,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $aiAlerts = $aiService->getProactiveAlerts();
         return view('dashboard', compact(
             'totalSalesCount',
             'totalRevenue',
@@ -89,7 +91,8 @@ class DashboardController extends Controller
             'last7Days',
             'recentSales',
             'topProduct',
-            'criticalStockProduct'
+            'criticalStockProduct',
+            'aiAlerts',
         ));
     }
 }
