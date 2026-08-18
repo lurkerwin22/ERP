@@ -7,23 +7,24 @@
         </div>
         <div class="flex space-x-3">
             <a href="{{ route('sales.index') }}"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50">
                 &larr; Back to Sales
             </a>
 
             <a href="{{ route('sales.invoice', $sale) }}"
-            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
+               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 flex items-center gap-2">
                 📄 View / Print Invoice
             </a>
+            
             <a href="{{ route('sales.receipt', $sale) }}" 
-            class="inline-flex items-center px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium rounded-md transition border border-indigo-200">
+               class="inline-flex items-center px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium rounded-md transition border border-indigo-200">
                 🧾 Receipt
             </a>
 
             @if($sale->status === 'completed')
                 <form method="POST"
-                    action="{{ route('sales.cancel', $sale) }}"
-                    onsubmit="return confirm('Are you sure you want to cancel this sale and restore the stock?');">
+                      action="{{ route('sales.cancel', $sale) }}"
+                      onsubmit="return confirm('Are you sure you want to cancel this sale and restore stock?');">
                     @csrf
                     @method('PATCH')
 
@@ -40,7 +41,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
             <span class="text-xs text-gray-500 uppercase font-semibold">Total Amount</span>
-            <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($sale->total, 2) }} TND</p>
+            <p class="text-2xl font-black text-gray-900 mt-1">{{ number_format($sale->total_amount, 2) }} TND</p>
         </div>
 
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
@@ -50,7 +51,7 @@
 
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
             <span class="text-xs text-gray-500 uppercase font-semibold">Remaining Balance</span>
-            <p class="text-2xl font-black text-red-600 mt-1">{{ number_format($sale->remaining_amount, 2) }} TND</p>
+            <p class="text-2xl font-black text-red-600 mt-1">{{ number_format($sale->remaining_balance, 2) }} TND</p>
         </div>
 
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
@@ -192,7 +193,7 @@
                 @if($sale->notes)
                     <div>
                         <label class="text-xs text-gray-500 uppercase font-semibold">Notes</label>
-                        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border text-xs mt-1">{{ $sale->notes }}</p>
+                        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border mt-1">{{ $sale->notes }}</p>
                     </div>
                 @endif
             </div>
@@ -205,7 +206,7 @@
                     <div class="p-4 bg-gray-100 text-gray-600 rounded-lg text-sm border border-gray-200">
                         This sale is <strong>cancelled</strong>. No payments can be added.
                     </div>
-                @elseif($sale->remaining_amount <= 0)
+                @elseif($sale->payment_status === 'paid')
                     <div class="p-4 bg-green-50 text-green-700 rounded-lg text-sm border border-green-200">
                         🎉 This sale is <strong>fully paid</strong>! No further payment needed.
                     </div>
@@ -216,8 +217,8 @@
                         <!-- Amount -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Amount (TND)</label>
-                            <input type="number" step="0.01" min="0.01" max="{{ $sale->remaining_amount }}" name="amount" value="{{ old('amount', $sale->remaining_amount) }}" required class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <span class="text-xs text-gray-500 mt-1 block">Max: {{ number_format($sale->remaining_amount, 2) }} TND</span>
+                            <input type="number" step="0.01" min="0.01" max="{{ $sale->remaining_balance }}" name="amount" value="{{ old('amount', $sale->remaining_balance) }}" required class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <span class="text-xs text-gray-500 mt-1 block">Max: {{ number_format($sale->remaining_balance, 2) }} TND</span>
                             @error('amount') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 

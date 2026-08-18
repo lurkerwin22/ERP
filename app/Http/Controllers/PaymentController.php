@@ -15,13 +15,14 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Cannot add payments to a cancelled sale.');
         }
 
-        // 2. Prevent overpayment: payment must be between 0.01 and remaining balance
-        $remaining = $sale->remaining_amount;
+        // 2. Check remaining balance using updated model accessor
+        $remaining = round($sale->remaining_balance,2);
 
         if ($remaining <= 0) {
             return redirect()->back()->with('error', 'This sale is already fully paid.');
         }
 
+        // 3. Server-side validation with dynamic remaining balance max limit
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01', "max:{$remaining}"],
             'payment_method' => ['required', 'string', 'in:cash,card,bank_transfer,check'],
@@ -30,7 +31,7 @@ class PaymentController extends Controller
             'amount.max' => "The payment amount cannot exceed the remaining balance of " . number_format($remaining, 2) . " TND.",
         ]);
 
-        // 3. Store the payment record
+        // 4. Store the payment record
         $sale->payments()->create([
             'amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
@@ -49,6 +50,6 @@ class PaymentController extends Controller
 
         $payment->delete();
 
-        return redirect()->back()->with('success', 'Payment reversed/deleted successfully.');
+        return redirect()->back()->with('success', 'Payment reversed successfully.');
     }
 }

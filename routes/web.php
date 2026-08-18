@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\DebtController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +34,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::delete('/logout', [SessionController::class, 'destroy']);
+    Route::delete('/logout', [SessionController::class, 'destroy'])->name('logout');
 
     // Products
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

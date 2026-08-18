@@ -1,180 +1,154 @@
+<!-- Mobile Drawer Toggle Button -->
 <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
         aria-controls="default-sidebar" type="button"
-        class="text-heading bg-transparent box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base ms-3 mt-3 text-sm p-2 focus:outline-none inline-flex sm:hidden">
+        class="text-gray-600 bg-transparent hover:bg-slate-100 focus:ring-2 focus:ring-slate-200 font-medium rounded-lg text-sm p-2.5 ms-3 mt-3 focus:outline-none inline-flex sm:hidden transition">
     <span class="sr-only">Open sidebar</span>
-
-    <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-         width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
-              d="M5 7h14M5 12h14M5 17h10"/>
+    <svg class="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
     </svg>
 </button>
 
 <aside id="default-sidebar"
-       class="fixed top-0 left-0 z-40 w-64 h-full transition-transform -translate-x-full sm:translate-x-0"
+       class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
        aria-label="Sidebar">
 
-    <div class="h-full px-3 py-4 overflow-y-auto bg-neutral-primary-soft border-e border-default">
+    <div class="h-full px-4 py-5 overflow-y-auto bg-slate-900 border-e border-slate-800 flex flex-col justify-between shadow-sm">
 
-        <ul class="flex flex-col h-full space-y-2 font-medium">
-
-            <!-- Dashboard -->
-            <li>
-                <a href="/"
-                   class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
-
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M3 13h8V3H3v10Zm10 8h8V11h-8v10ZM3 21h8v-6H3v6Zm10-18v6h8V3h-8Z"/>
+        <div>
+            <!-- App Logo / Header -->
+            <div class="flex items-center gap-3 px-3 pb-6 mb-2 border-b border-slate-800/80">
+                <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-base font-bold text-white tracking-tight leading-none">ERP System</span>
+                    <span class="text-xs font-medium text-slate-400 mt-1">Management Portal</span>
+                </div>
+            </div>
 
-                    <span class="ms-3">Dashboard</span>
-                </a>
-            </li>
+            <!-- Navigation Links -->
+            <ul class="space-y-1 font-medium">
 
+                <!-- Dashboard -->
+                <li>
+                    <a href="{{ route('dashboard') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('dashboard') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h8V3H3v10Zm10 8h8V11h-8v10ZM3 21h8v-6H3v6Zm10-18v6h8V3h-8Z"/>
+                        </svg>
+                        <span class="ms-3">Dashboard</span>
+                    </a>
+                </li>
 
-            <!-- Product -->
-            <li>
-                <a href="/products"
-                   class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <!-- Products -->
+                <li>
+                    <a href="{{ route('products.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('products.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('products.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7.5 12 3 4 7.5m16 0v9L12 21l-8-4.5v-9m16 0-8 4.5m0 0L4 7.5M12 12v9"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Products</span>
+                    </a>
+                </li>
 
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M20 7.5 12 3 4 7.5m16 0v9L12 21l-8-4.5v-9m16 0-8 4.5m0 0L4 7.5M12 12v9"/>
-                    </svg>
+                <!-- Categories -->
+                <li>
+                    <a href="{{ route('categories.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('categories.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('categories.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Categories</span>
+                    </a>
+                </li>
 
-                    <span class="flex-1 ms-3 whitespace-nowrap">Product</span>
-                </a>
-            </li>
+                <!-- Stock -->
+                <li>
+                    <a href="{{ route('stock.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('stock.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('stock.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16M7 4v16"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Stock</span>
+                    </a>
+                </li>
 
+                <!-- Customers -->
+                <li>
+                    <a href="{{ route('customers.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('customers.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('customers.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19a4 4 0 0 0-8 0"/>
+                            <circle cx="11" cy="9" r="4" stroke="currentColor" stroke-width="2"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12a3 3 0 1 0-2.5-4.5M17 19h4"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Customers</span>
+                    </a>
+                </li>
 
-            <!-- Categories -->
-            <li>
-                <a href="/categories"
-                   class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <!-- Sales -->
+                <li>
+                    <a href="{{ route('sales.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('sales.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('sales.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16v14H4V5Z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8M8 13h5M15 17h2"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Sales</span>
+                    </a>
+                </li>
 
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"/>
-                    </svg>
+                <!-- Debts -->
+                <li>
+                    <a href="{{ route('debts.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('debts.*') ? 'bg-red-600 text-white font-semibold shadow-lg shadow-red-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('debts.*') ? 'text-white' : 'text-slate-400 group-hover:text-red-400' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 8v2m0-10e-5c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Debts</span>
+                    </a>
+                </li>
 
-                    <span class="flex-1 ms-3 whitespace-nowrap">Categories</span>
-                </a>
-            </li>
+                <!-- Quotes -->
+                <li>
+                    <a href="{{ route('quotes.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('quotes.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('quotes.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Quotes</span>
+                    </a>
+                </li>
 
+            </ul>
+        </div>
 
-            <!-- Stock -->
-            <li>
-                <a href="/stock"
-                   class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+        <!-- Logout Section -->
+        <div class="pt-4 border-t border-slate-800">
+            @auth
+                @if (Route::has('logout'))
+                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                        @csrf
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Log Out
+                        </button>
+                    </form>
+                @endif
+            @endauth
+        </div>
 
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M4 7h16M4 12h16M4 17h16"/>
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M7 4v16"/>
-                    </svg>
-
-                    <span class="flex-1 ms-3 whitespace-nowrap">Stock</span>
-                </a>
-            </li>
-
-
-            <!-- Customers -->
-            <li>
-                <a href="/customers"
-                   class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
-
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M15 19a4 4 0 0 0-8 0"/>
-                        <circle cx="11" cy="9" r="4"
-                                stroke="currentColor" stroke-width="2"/>
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-width="2"
-                              d="M19 12a3 3 0 1 0-2.5-4.5"/>
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-width="2"
-                              d="M17 19h4"/>
-                    </svg>
-
-                    <span class="flex-1 ms-3 whitespace-nowrap">Customers</span>
-                </a>
-            </li>
-
-
-            <!-- Sales -->
-            <li>
-                <a href="/sales"
-                   class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
-
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2"
-                              d="M4 5h16v14H4V5Z"/>
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-width="2"
-                              d="M8 9h8M8 13h5"/>
-                        <path stroke="currentColor" stroke-linecap="round"
-                              stroke-width="2"
-                              d="M15 17h2"/>
-                    </svg>
-
-                    <span class="flex-1 ms-3 whitespace-nowrap">Sales</span>
-                </a>
-            </li>
-            <!-- Quotes (Devis) -->
-            <li>
-                <a href="{{ route('quotes.index') }}"
-                class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group {{ request()->routeIs('quotes.*') ? 'bg-neutral-tertiary text-fg-brand font-medium' : '' }}">
-
-                    <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"
-                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                        width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"/>
-                    </svg>
-
-                    <span class="flex-1 ms-3 whitespace-nowrap">Quotes</span>
-                </a>
-            </li>
-
-
-            <!-- Logout -->
-            <li class="mt-auto pt-6 mb-6">
-                @auth
-                    <div class="font-bold flex">
-                        <form method="POST" action="/logout" class="w-full">
-                            @csrf
-                            @method('DELETE')
-
-                            <x-forms.button class="w-full">
-                                Log Out
-                            </x-forms.button>
-                        </form>
-                    </div>
-                @endauth
-            </li>
-
-        </ul>
     </div>
 </aside>

@@ -22,6 +22,14 @@ class Sale extends Model
         'sale_date' => 'datetime',
     ];
 
+    // Ensure computed attributes are automatically available
+    protected $appends = [
+        'total_amount',
+        'amount_paid',
+        'remaining_balance',
+        'payment_status',
+    ];
+
     // Relationships
     public function saleItems()
     {
@@ -38,29 +46,58 @@ class Sale extends Model
         return $this->hasMany(Payment::class, 'sale_id');
     }
 
-    // Calculated Financial Attributes
+    // --- Financial Accessors ---
+
+    /**
+     * Map 'total_amount' to 'total' DB column (falls back to items sum if total is 0 or null)
+     */
+    public function getTotalAmountAttribute(): float
+    {
+        $total = (float) $this->attributes['total'];
+
+        if ($total > 0) {
+            return round($total,2);
+        }
+
+        // Safety fallback: sum directly from items if DB column isn't populated
+        return (float) round($this->saleItems->sum(function ($item) {
+            return $item->unit_price * $item->quantity;
+        }),2);
+    }
+
+    /**
+     * Total Amount Paid
+     */
     public function getAmountPaidAttribute(): float
     {
-        // Uses loaded relation if present to prevent redundant database queries
-        return (float) $this->payments->sum('amount');
+        return (float) round($this->payments->sum('amount'),2);
     }
 
-    public function getRemainingAmountAttribute(): float
+    /**
+     * Remaining Balance
+     */
+    public function getRemainingBalanceAttribute(): float
     {
-        return max(0, (float) $this->total - $this->amount_paid);
+        return round($this->total_amount - $this->amount_paid,2);
     }
 
+    /**
+     * Payment Status Badge Logic
+     */
     public function getPaymentStatusAttribute(): string
     {
         if ($this->status === 'cancelled') {
             return 'cancelled';
         }
 
-        if ($this->amount_paid <= 0) {
+        $paid = $this->amount_paid;
+        $total = $this->total_amount;
+
+        if ($paid <= 0) {
             return 'unpaid';
         }
 
-        if ($this->amount_paid < $this->total) {
+        if ($paid < $total) {
             return 'partial';
         }
 

@@ -25,7 +25,7 @@ class Payment extends Model
     {
         return $this->belongsTo(Sale::class, 'sale_id');
     }
-    
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'sale_id');
@@ -35,24 +35,20 @@ class Payment extends Model
     public function getAmountPaidAttribute(): float
     {
         // Sum loaded payments in memory if relationship is loaded to avoid extra queries
-        return (float) $this->payments->sum('amount');
+        return (float) round($this->payments->sum('amount'),2);
     }
 
     public function getRemainingAmountAttribute(): float
     {
-        return max(0, (float) $this->total - $this->amount_paid);
+        return max(0, (float) round($this->total - $this->amount_paid,2));
     }
 
-    public function getPaymentStatusAttribute(): string
+    public function getPaymentStatusAttribute()
     {
-        if ($this->amount_paid <= 0) {
-            return 'unpaid';
+        if ($this->remaining_balance <= 0) {
+            return 'paid';
         }
-
-        if ($this->amount_paid < $this->total) {
-            return 'partial';
-        }
-
-        return 'paid';
+    
+        return $this->amount_paid > 0 ? 'partial' : 'unpaid';
     }
 }
