@@ -43,7 +43,7 @@ class Sale extends Model
 
     public function payments()
     {
-        return $this->hasMany(Payment::class, 'sale_id');
+        return $this->hasMany(Payment::class);
     }
 
     // --- Financial Accessors ---

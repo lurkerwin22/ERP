@@ -65,7 +65,7 @@
                                     {{ number_format($sale->amount_paid, 2) }} TND
                                 </td>
                                 <td class="px-6 py-4 text-right font-bold text-red-600">
-                                    {{ number_format($sale->remaining_amount, 2) }} TND
+                                   {{ number_format($sale->remaining_balance, 2) }} TND
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($sale->payment_status === 'partial')

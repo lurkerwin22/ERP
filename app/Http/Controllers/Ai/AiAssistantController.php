@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Services\DebtService;
 
 class AiAssistantController extends Controller
 {
@@ -284,16 +285,10 @@ class AiAssistantController extends Controller
                     ->toArray(),
 
                 // Calcul dynamique des dettes clients
-                'get_overdue_debtors' => \App\Models\Customer::select('customers.id', 'customers.name', 'customers.email', 'customers.phone')
-                    ->selectRaw('SUM(sales.total) as outstanding_debt')
-                    ->join('sales', 'customers.id', '=', 'sales.customer_id')
-                    ->where('sales.status', '!=', 'cancelled')
-                    ->groupBy('customers.id', 'customers.name', 'customers.email', 'customers.phone')
-                    ->having('outstanding_debt', '>=', $args['min_amount'] ?? 1000)
-                    ->orderByDesc('outstanding_debt')
-                    ->take(5)
-                    ->get()
-                    ->toArray(),
+                'get_overdue_debtors' => app(DebtService::class)
+                ->getCustomerDebts(
+                    (float) ($args['min_amount'] ?? 1000)
+                ),
 
                 'get_product_performance' => \App\Models\Product::query()
                     ->select(
