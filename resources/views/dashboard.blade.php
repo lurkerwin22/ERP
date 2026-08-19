@@ -77,7 +77,7 @@
                             <p class="text-xs text-amber-700">Analyse automatique en temps réel de votre activité ERP</p>
                         </div>
                     </div>
-                    <a href="{{ route('ai.assistant') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-indigo-100 shadow-2xs hover:shadow-xs transition">
+                    <a href="{{ route('ai.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-indigo-100 shadow-2xs hover:shadow-xs transition">
                         <span>Consulter l'assistant</span>
                         <span>&rarr;</span>
                     </a>

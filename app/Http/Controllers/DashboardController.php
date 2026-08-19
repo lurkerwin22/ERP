@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        protected AiAssistantService $aiService
+    ) {}
     public function index()
     {
         // 1. High-Level Summary Aggregates
@@ -79,7 +82,10 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $aiAlerts = $aiService->getProactiveAlerts();
+
+        // 3. Access it via $this->aiService
+        $aiAlerts = $this->aiService->getProactiveAlerts();
+
         return view('dashboard', compact(
             'totalSalesCount',
             'totalRevenue',
@@ -92,7 +98,7 @@ class DashboardController extends Controller
             'recentSales',
             'topProduct',
             'criticalStockProduct',
-            'aiAlerts',
+            'aiAlerts'
         ));
     }
 }

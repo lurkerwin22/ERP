@@ -129,6 +129,13 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Quotes</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('ai.index') }}" 
+                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition {{ request()->routeIs('ai.*') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800' }}">
+                        <span>🤖</span>
+                        <span>Assistant IA</span>
+                    </a>
+                </li>
 
             </ul>
         </div>
