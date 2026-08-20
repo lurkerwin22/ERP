@@ -7,85 +7,118 @@ use Illuminate\Support\Facades\Log;
 
 class AiAgentService
 {
-    protected ToolRegistry $toolRegistry;
     protected string $apiKey;
-    protected string $model;
+    protected string $routerModel;
+    protected string $analystModel;
 
-    public function __construct(ToolRegistry $toolRegistry)
-    {
-        $this->toolRegistry = $toolRegistry;
-        $this->apiKey = config('services.groq.api_key', env('GROQ_API_KEY', ''));
-        $this->model = config('services.groq.model', env('GROQ_MODEL', 'qwen/qwen3.6-27b'));
+    public function __construct(
+        protected ToolRegistry $toolRegistry,
+        protected IntentRouter $intentRouter
+    ) {
+        $this->apiKey       = config('services.groq.api_key');
+        $this->routerModel  = config('services.groq.router_model', 'openai/gpt-oss-20b');
+        $this->analystModel = config('services.groq.analyst_model', 'qwen/qwen3.6-27b');
     }
 
     public function chat(array $messages): array
     {
-        $systemPrompt = [
-            'role' => 'system',
-            'content' => 'You are an intelligent ERP Business Assistant. Analyze data carefully and provide concise, clear answers. All monetary values are in Tunisian Dinars (TND).'
-        ];
+        $lastUserMessage = collect($messages)->where('role', 'user')->last()['content'] ?? '';
 
-        if (empty($messages) || $messages[0]['role'] !== 'system') {
-            array_unshift($messages, $systemPrompt);
+        // 1. Phase 2: Instant PHP Regex Router (0 tokens)
+        if ($localResponse = $this->intentRouter->matchAndExecute($lastUserMessage)) {
+            return $localResponse;
         }
 
-        for ($iteration = 0; $iteration < 3; $iteration++) {
-            $response = Http::retry(3, 2000) // Retries up to 3 times, waiting 2000ms (2s) between attempts
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type'  => 'application/json',
-                ])
-                ->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'    => $this->model,
-                    'messages' => $messages,
-                    'tools'    => $this->toolRegistry->getTools(),
-                ]);
+        // 2. Phase 3: Lightweight Model for Tool Identification
+        $toolCall = $this->extractToolWithSmallModel($messages);
 
-            if ($response->failed()) {
-                Log::error('Groq API Error: ' . $response->body());
-                return [
-                    'role' => 'assistant',
-                    'content' => 'An error occurred while communicating with the AI service: ' . $response->reason(),
-                ];
-            }
+        if (!$toolCall) {
+            // General conversational query: reply directly using the fast model
+            return $this->sendCompletion($this->routerModel, $messages);
+        }
 
-            $choice = $response->json('choices.0.message');
+        // Execute identified ERP Tool
+        $toolResult = $this->toolRegistry->execute($toolCall['name'], $toolCall['args']);
 
-            if (!$choice) {
-                return [
-                    'role' => 'assistant',
-                    'content' => 'Received empty response from AI engine.',
-                ];
-            }
+        // Check if the user prompt asks for analysis/advice
+        if ($this->requiresDeepAnalysis($lastUserMessage)) {
+            // Forward data to heavy model for strategy/analysis
+            return $this->synthesizeWithAnalystModel($messages, $toolCall['name'], $toolResult);
+        }
 
-            if (!empty($choice['tool_calls'])) {
-                $messages[] = $choice;
+        // Simple lookup: return formatted template without calling heavy LLM
+        return [
+            'role' => 'assistant',
+            'content' => $this->formatSimpleToolOutput($toolCall['name'], $toolResult)
+        ];
+    }
 
-                foreach ($choice['tool_calls'] as $toolCall) {
-                    $toolName = $toolCall['function']['name'];
-                    $toolArgs = json_decode($toolCall['function']['arguments'] ?? '{}', true) ?? [];
+    protected function extractToolWithSmallModel(array $messages): ?array
+    {
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $this->apiKey])
+            ->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model'    => $this->routerModel,
+                'messages' => $messages,
+                'tools'    => $this->toolRegistry->getTools(),
+                'tool_choice' => 'auto',
+            ]);
 
-                    $toolOutput = $this->toolRegistry->execute($toolName, $toolArgs);
+        $message = $response->json('choices.0.message');
 
-                    $messages[] = [
-                        'role' => 'tool',
-                        'tool_call_id' => $toolCall['id'],
-                        'content' => json_encode($toolOutput),
-                    ];
-                }
-
-                continue;
-            }
-
+        if (!empty($message['tool_calls'][0])) {
+            $call = $message['tool_calls'][0]['function'];
             return [
-                'role' => 'assistant',
-                'content' => $choice['content'] ?? 'No text response generated.',
+                'name' => $call['name'],
+                'args' => json_decode($call['arguments'] ?? '{}', true),
             ];
         }
 
+        return null;
+    }
+
+    protected function requiresDeepAnalysis(string $prompt): bool
+    {
+        $prompt = mb_strtolower($prompt);
+
+        $keywords = [
+            // French Strategy Keywords
+            'analyse', 'pourquoi', 'stratégie', 'conseil', 'recommandation', 'optimiser', 'expliquer', 'comment', 'augmenter',
+            // English Strategy Keywords
+            'increase', 'increament', 'grow', 'boost', 'how', 'what', 'should', 'recommend', 'advice', 'strategy', 'improve'
+        ];
+
+        $pattern = '/(' . implode('|', $keywords) . ')/u';
+
+        return (bool) preg_match($pattern, $prompt);
+    }
+
+    protected function synthesizeWithAnalystModel(array $messages, string $toolName, array $data): array
+    {
+        $messages[] = [
+            'role' => 'system',
+            'content' => "Données extraites de l'outil {$toolName}: " . json_encode($data) . "\nAnalyse ces données et réponds de façon concise et stratégique."
+        ];
+
+        return $this->sendCompletion($this->analystModel, $messages);
+    }
+
+    protected function sendCompletion(string $model, array $messages): array
+    {
+        $res = Http::retry(2, 1000)
+            ->withHeaders(['Authorization' => 'Bearer ' . $this->apiKey])
+            ->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model'    => $model,
+                'messages' => $messages,
+            ]);
+
         return [
             'role' => 'assistant',
-            'content' => 'Execution limit reached without a final answer.',
+            'content' => $res->json('choices.0.message.content', 'Une erreur est survenue.')
         ];
+    }
+
+    protected function formatSimpleToolOutput(string $toolName, array $data): string
+    {
+        return "```json\n" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n```";
     }
 }

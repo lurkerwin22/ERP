@@ -27,22 +27,25 @@ class AiAssistantController extends Controller
         return view('ai.index', compact('alerts'));
     }
 
-    public function chat(Request $request)
+    public function chat(Request $request, AiAgentService $aiAgentService)
     {
+        $inputMessages = $request->input('messages');
+
+        // Fallback if JS sends 'message' string instead of 'messages' array
+        if (!$inputMessages && $request->has('message')) {
+            $inputMessages = [
+                ['role' => 'user', 'content' => $request->input('message')]
+            ];
+        }
+
+        $request->merge(['messages' => $inputMessages]);
+
         $validated = $request->validate([
             'messages' => 'required|array',
-            'messages.*.role' => 'required|string',
-            'messages.*.content' => 'nullable|string',
         ]);
 
-        $responseMessage = $this->agentService->chat($validated['messages']);
+        $response = $aiAgentService->chat($validated['messages']);
 
-        $content = $responseMessage['content'] ?? 'No response generated.';
-
-        return response()->json([
-            'role' => 'assistant',
-            'content' => $content,
-            'reply' => $content, // Satisfies app.js (data.reply)
-        ]);
+        return response()->json($response);
     }
 }

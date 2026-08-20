@@ -15,7 +15,8 @@ return [
     */
     'groq' => [
         'api_key' => env('GROQ_API_KEY'),
-        'model'   => env('GROQ_MODEL', 'openai/gpt-oss-20b'),
+        'router_model'  => env('GROQ_ROUTER_MODEL', 'openai/gpt-oss-20b'),
+        'analyst_model' => env('GROQ_ANALYST_MODEL', 'qwen/qwen3.6-27b'),
     ],
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),

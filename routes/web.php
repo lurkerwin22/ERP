@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\Ai\AiAssistantController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SessionController;
@@ -96,5 +97,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Search API Route for New Sale Live Search
     Route::get('/api/products/search', [ProductController::class, 'search'])->name('products.search');
+
+    // API Reports
+    Route::get('/stock-alerts', [ReportController::class, 'stockAlerts'])->name('reports.stock');
+    Route::get('/monthly-sales', [ReportController::class, 'monthlySales'])->name('reports.sales');
+    Route::get('/customer-debts', [ReportController::class, 'customerDebts'])->name('reports.debts');
 
 });
