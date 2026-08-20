@@ -18,8 +18,15 @@ class ProductController extends Controller
 
         // 1. Global Search
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-            ->OrWhere('description','like', '%' . $request->search . '%');
+            $search = $request->input('search');
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhereHas('category', function ($catQuery) use ($search) { // <-- Added 'use ($search)' here
+                    $catQuery->where('name', 'like', "%{$search}%");
+                });
+            });
         }
 
         // 2. Category Filter
