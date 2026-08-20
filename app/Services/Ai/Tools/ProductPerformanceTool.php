@@ -1,76 +1,67 @@
 <?php
+
 namespace App\Services\Ai\Tools;
 
-use App\Models\Product;
+use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 
-class ProductPerformanceTool
+class ProductPerformanceTool extends BaseTool
 {
     public function name(): string
     {
-        return 'get_product_performance';
+        return 'get_top_products';
     }
 
     public function description(): string
     {
-        return 'Get a list of top-selling products, including total quantities sold and total revenue generated. Can be filtered by date.';
+        return 'Retrieve top-selling products ranked by revenue generated or quantity sold.';
     }
 
     public function parameters(): array
     {
         return [
-            'type' => 'object',
-            'properties' => [
-                'limit' => [
-                    'type' => 'integer',
-                    'description' => 'The number of top products to return (default: 5)'
-                ],
-                'start_date' => [
-                    'type' => 'string',
-                    'description' => 'Start date for the performance period in YYYY-MM-DD format (optional)'
-                ],
-                'end_date' => [
-                    'type' => 'string',
-                    'description' => 'End date for the performance period in YYYY-MM-DD format (optional)'
-                ]
-            ]
+            'limit' => [
+                'type' => 'integer',
+                'description' => 'Number of top products to return (default: 5)',
+            ],
+            'days' => [
+                'type' => 'integer',
+                'description' => 'Filter sales from the past N days (optional)',
+            ],
         ];
     }
 
-    public function execute(array $args): string
+    public function execute(array $args = []): array
     {
         $limit = $args['limit'] ?? 5;
-        
-        $query = Product::query()
-            ->select(
-                'products.id',
-                'products.name',
-                DB::raw('SUM(sale_items.quantity) as total_quantity_sold'),
-                // Adjust 'total' below if your sale_items schema uses 'subtotal' or 'price' * 'quantity'
-                DB::raw('SUM(sale_items.total) as total_revenue') 
-            )
-            ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
-            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
-            ->groupBy('products.id', 'products.name')
-            ->orderByDesc('total_revenue');
+        $query = SaleItem::query()
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->where('sales.status', '!=', 'cancelled');
 
-        if (!empty($args['start_date'])) {
-            $query->whereDate('sales.created_at', '>=', $args['start_date']);
+        if (!empty($args['days'])) {
+            $query->where('sales.sale_date', '>=', now()->subDays($args['days']));
         }
 
-        if (!empty($args['end_date'])) {
-            $query->whereDate('sales.created_at', '<=', $args['end_date']);
-        }
+        $topProducts = $query->select(
+            'sale_items.product_id',
+            'sale_items.product_name',
+            DB::raw('SUM(sale_items.quantity) as total_quantity_sold'),
+            DB::raw('SUM(sale_items.subtotal) as total_revenue_generated')
+        )
+        ->groupBy('sale_items.product_id', 'sale_items.product_name')
+        ->orderByDesc('total_revenue_generated')
+        ->limit($limit)
+        ->get();
 
-        $results = $query->limit($limit)->get();
-
-        return json_encode([
-            'status' => 'success',
-            'timeframe' => [
-                'start' => $args['start_date'] ?? 'all-time',
-                'end' => $args['end_date'] ?? 'all-time',
-            ],
-            'data' => $results
-        ]);
+        return [
+            'count' => $topProducts->count(),
+            'period_analyzed' => !empty($args['days']) ? "Past {$args['days']} days" : 'All time',
+            'products' => $topProducts->map(fn ($p) => [
+                'product_id' => $p->product_id,
+                'product_name' => $p->product_name,
+                'total_quantity_sold' => (int) $p->total_quantity_sold,
+                'total_revenue_tnd' => round((float) $p->total_revenue_generated, 3),
+            ])->toArray(),
+        ];
     }
 }

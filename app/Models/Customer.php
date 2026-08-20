@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Sale;
+use App\Models\Payment;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Customer extends Model
 {
@@ -47,5 +50,9 @@ class Customer extends Model
     public function getTotalOutstandingDebtAttribute(): float
     {
         return max(0, $this->total_purchases - $this->total_paid);
+    }
+    public function payments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Payment::class, Sale::class);
     }
 }

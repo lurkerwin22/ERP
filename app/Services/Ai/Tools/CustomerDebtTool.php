@@ -32,6 +32,7 @@ class CustomerDebtTool
         $minDebt = (float) ($args['min_debt'] ?? 0);
 
         return app(DebtService::class)
-            ->getCustomerDebts($minDebt);
+            ->getCustomerDebts($minDebt)
+            ->toArray();
     }
 }
