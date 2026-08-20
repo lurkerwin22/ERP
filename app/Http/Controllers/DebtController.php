@@ -9,10 +9,8 @@ class DebtController extends Controller
 {
     public function index(Request $request, DebtService $debtService)
     {
-        $sales = $debtService->getOutstandingSales();
-
+        $sales = $debtService->getPaginatedOutstandingSales(15);
         $totalDebt = $debtService->getTotalDebt();
-
         $totalSalesWithDebt = $debtService->getOutstandingSalesCount();
 
         return view('debts.index', compact(

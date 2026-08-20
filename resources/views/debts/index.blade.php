@@ -86,4 +86,10 @@
             </div>
         @endif
     </div>
+    <!-- Pagination -->
+    @if($sales->hasPages())
+        <div class="mt-6">
+            {{ $sales->links() }}
+        </div>
+    @endif
 </x-layout>
