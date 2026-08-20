@@ -14,22 +14,66 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::query();
+        $query = Product::query()->with('category');
 
+        // 1. Global Search
         if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
+            $query->where('name', 'like', '%' . $request->search . '%')
+            ->OrWhere('description','like', '%' . $request->search . '%');
         }
 
-        $products = $query->latest()->paginate(10)->withQueryString();
+        // 2. Category Filter
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
 
-        return view('products.index', [
-            'products'  => $products,
-            'category' => null,
-        ]);
+        // 3. Stock Status Filter
+        if ($request->filled('stock_status')) {
+            match ($request->stock_status) {
+                'in_stock' => $query->where('stock', '>', 0),
+                'low_stock' => $query->whereColumn('stock', '<=', 'alert_threshold')
+                                     ->where('stock', '>', 0),
+                'out_of_stock' => $query->where('stock', '<=', 0),
+                default => null,
+            };
+        }
+
+        // 4. Price Range Filter
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            $minPrice = $request->filled('min_price') ? (float) $request->min_price : null;
+            $maxPrice = $request->filled('max_price') ? (float) $request->max_price : null;
+
+            // Swap if URL parameters have min > max
+            if ($minPrice !== null && $maxPrice !== null && $minPrice > $maxPrice) {
+                [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
+            }
+
+            if ($minPrice !== null) {
+                $query->where('price', '>=', $minPrice);
+            }
+
+            if ($maxPrice !== null) {
+                $query->where('price', '<=', $maxPrice);
+            }
+        }
+
+        // 5. Sorting
+        match ($request->get('sort')) {
+            'oldest' => $query->oldest(),
+            'name_asc' => $query->orderBy('name', 'asc'),
+            'name_desc' => $query->orderBy('name', 'desc'),
+            'price_asc' => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'stock_asc' => $query->orderBy('stock', 'asc'),
+            'stock_desc' => $query->orderBy('stock', 'desc'),
+            default => $query->latest(), // Newest first
+        };
+
+        // Paginate and preserve query parameters in links
+        $products = $query->paginate(12)->withQueryString();
+        $categories = Category::orderBy('name')->get();
+
+        return view('products.index', compact('products', 'categories'));
     }
 
     /**
