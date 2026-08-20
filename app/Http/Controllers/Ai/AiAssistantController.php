@@ -96,13 +96,17 @@ class AiAssistantController extends Controller
                     'type' => 'function',
                     'function' => [
                         'name' => 'get_overdue_debtors',
-                        'description' => 'Retrieve clients with unpaid invoices or outstanding debts above a specified amount.',
+                        'description' => 'Retrieve clients with unpaid invoices or outstanding debts. Supports filtering by minimum and/or maximum debt amount in TND.',
                         'parameters' => [
                             'type' => 'object',
                             'properties' => [
                                 'min_amount' => [
                                     'type' => 'number',
-                                    'description' => 'Minimum unpaid debt in TND to flag (default: 1000)',
+                                    'description' => 'Minimum unpaid debt in TND (optional)',
+                                ],
+                                'max_amount' => [
+                                    'type' => 'number',
+                                    'description' => 'Maximum unpaid debt in TND (optional, e.g. set 1000 to find debtors with debt < 1000 TND)',
                                 ],
                             ],
                         ],
@@ -266,17 +270,25 @@ class AiAssistantController extends Controller
     {
         try {
             return match ($name) {
-                'get_sales_analytics' => [
-                    'days' => $args['days'] ?? 7,
-                    'recent_items' => \App\Models\SaleItem::with('product:id,name')
-                        ->where('created_at', '>=', now()->subDays($args['days'] ?? 7))
+                'get_sales_analytics' => (function () use ($args) {
+                    $days = $args['days'] ?? 7;
+                    $items = \App\Models\SaleItem::with('product:id,name')
+                        ->where('created_at', '>=', now()->subDays($days))
                         ->latest()
                         ->take(10)
-                        ->get(['id', 'product_id', 'quantity', 'unit_price', 'total_price', 'created_at'])
-                        ->toArray(),
-                ],
+                        ->get(['id', 'product_id', 'quantity', 'unit_price', 'total_price', 'created_at']);
 
-                // Détection basée sur 'stock' et comparaison avec 'alert_threshold'
+                    // Si aucun élément sur la période, fallback sur les derniers articles vendus
+                    if ($items->isEmpty()) {
+                        $items = \App\Models\SaleItem::with('product:id,name')->latest()->take(10)->get();
+                    }
+
+                    return [
+                        'days_analyzed' => $days,
+                        'recent_items' => $items->toArray(),
+                    ];
+                })(),
+
                 'get_low_stock_products' => \App\Models\Product::whereColumn('stock', '<=', 'alert_threshold')
                     ->orWhere('stock', '<=', $args['threshold'] ?? 10)
                     ->orderBy('stock', 'asc')
@@ -284,18 +296,56 @@ class AiAssistantController extends Controller
                     ->get(['id', 'name', 'stock', 'alert_threshold', 'price'])
                     ->toArray(),
 
-                // Calcul dynamique des dettes clients
-                'get_overdue_debtors' => app(DebtService::class)
-                ->getCustomerDebts(
-                    (float) ($args['min_amount'] ?? 1000)
-                ),
+                // Calcul 100% sécurisé via Eloquent sans SQL GROUP BY strict errors
+                'get_overdue_debtors' => \App\Models\Customer::with(['sales' => function ($q) {
+                        $q->where('status', '!=', 'cancelled');
+                    }])
+                    ->get()
+                    ->map(function ($customer) {
+                        $debt = $customer->sales->sum(function ($sale) {
+                            return $sale->remaining_balance ?? $sale->total;
+                        });
+
+                        return [
+                            'id' => $customer->id,
+                            'name' => $customer->name,
+                            'email' => $customer->email,
+                            'phone' => $customer->phone,
+                            'outstanding_debt' => round((float) $debt, 3),
+                        ];
+                    })
+                    ->filter(function ($customer) use ($args) {
+                        $debt = $customer['outstanding_debt'];
+                        if ($debt <= 0) {
+                            return false;
+                        }
+
+                        $min = $args['min_amount'] ?? null;
+                        $max = $args['max_amount'] ?? null;
+
+                        if ($max !== null && $min !== null) {
+                            return $debt >= $min && $debt <= $max;
+                        }
+                        if ($max !== null) {
+                            return $debt <= $max;
+                        }
+                        if ($min !== null) {
+                            return $debt >= $min;
+                        }
+
+                        return $debt >= 1000; // Seuil par défaut
+                    })
+                    ->sortByDesc('outstanding_debt')
+                    ->take(10)
+                    ->values()
+                    ->toArray(),
 
                 'get_product_performance' => \App\Models\Product::query()
                     ->select(
                         'products.id',
                         'products.name',
                         \Illuminate\Support\Facades\DB::raw('SUM(sale_items.quantity) as total_quantity_sold'),
-                        \Illuminate\Support\Facades\DB::raw('SUM(sale_items.total_price) as total_revenue') 
+                        \Illuminate\Support\Facades\DB::raw('SUM(sale_items.total_price) as total_revenue')
                     )
                     ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
                     ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
@@ -308,19 +358,18 @@ class AiAssistantController extends Controller
                     ->get()
                     ->toArray(),
 
-                // Synthèse financière basée sur 'sales.total'
                 'get_business_summary' => [
                     'total_invoiced_all_time' => round(\App\Models\Sale::where('status', '!=', 'cancelled')->sum('total') ?? 0, 3),
                     'total_collected_all_time' => round(\App\Models\Payment::sum('amount') ?? 0, 3),
                     'total_outstanding_debt' => round(
-                        (\App\Models\Sale::where('status', '!=', 'cancelled')->sum('total') ?? 0) - (\App\Models\Payment::sum('amount') ?? 0), 
+                        (\App\Models\Sale::where('status', '!=', 'cancelled')->sum('total') ?? 0) - (\App\Models\Payment::sum('amount') ?? 0),
                         3
                     ),
                     'current_month_invoiced' => round(
                         \App\Models\Sale::where('status', '!=', 'cancelled')
                             ->whereMonth('sale_date', now()->month)
                             ->whereYear('sale_date', now()->year)
-                            ->sum('total') ?? 0, 
+                            ->sum('total') ?? 0,
                         3
                     ),
                     'active_customers_count' => \App\Models\Customer::has('sales')->count(),
