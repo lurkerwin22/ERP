@@ -353,3 +353,181 @@ document.addEventListener('DOMContentLoaded', function () {
         amountPaidInput.addEventListener('input', updateTotals);
     }
 });
+//quote script
+document.addEventListener('DOMContentLoaded', function () {
+    const quoteForm = document.getElementById('quote-form');
+    
+    // Safety Guard: Execute only if the quote form exists on the page
+    if (!quoteForm) return;
+
+    const tbody = document.getElementById('items-table-body');
+    const addProductBtn = document.getElementById('add-product-btn');
+    const grandTotalEl = document.getElementById('grand-total');
+    let rowIndex = 0;
+
+    function createRow(product = null) {
+        const tr = document.createElement('tr');
+        tr.className = 'item-row hover:bg-gray-50/60 transition';
+        
+        const productId = product ? product.id : '';
+        const productName = product ? product.name : '';
+        const price = product ? parseFloat(product.price).toFixed(2) : '0.00';
+        const stock = product ? product.stock : 0;
+
+        tr.innerHTML = `
+            <td class="py-3 px-4 align-middle relative">
+                <input type="text" class="product-search-input w-full text-xs border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-400 py-2 px-3" 
+                    placeholder="Type product name..." value="${productName}" autocomplete="off" required />
+                <input type="hidden" name="items[${rowIndex}][product_id]" class="product-id-input" value="${productId}" required />
+                
+                <div class="search-results hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto text-xs divide-y divide-gray-100"></div>
+            </td>
+            <td class="py-3 px-3 align-middle">
+                <div class="flex flex-col items-center">
+                    <input type="number" name="items[${rowIndex}][quantity]" value="1" min="1" 
+                        class="qty-input w-full text-center text-xs font-medium border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 px-2" required />
+                    <span class="stock-badge block text-[10px] ${stock === 0 ? 'text-red-500 font-bold' : 'text-gray-400 font-normal'} mt-1" data-stock="${stock}">
+                        ${productId ? (stock === 0 ? 'Out of Stock' : `Max: ${stock}`) : 'Stock: --'}
+                    </span>
+                </div>
+            </td>
+            <td class="py-3 px-3 align-middle">
+                <input type="number" step="0.01" name="items[${rowIndex}][unit_price]" value="${price}" min="0" 
+                    class="price-input w-full text-right text-xs border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 px-2 font-medium" required />
+            </td>
+            <td class="py-3 px-4 align-middle text-right font-bold text-gray-800 text-xs subtotal-cell">
+                ${price} TND
+            </td>
+            <td class="py-3 px-2 align-middle text-center">
+                <button type="button" class="remove-row-btn text-gray-400 hover:text-red-600 font-bold text-base transition">&times;</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+        setupRowSearch(tr);
+        rowIndex++;
+        calculateGrandTotal();
+    }
+
+    function setupRowSearch(tr) {
+        const searchInput = tr.querySelector('.product-search-input');
+        const hiddenIdInput = tr.querySelector('.product-id-input');
+        const resultsBox = tr.querySelector('.search-results');
+        const priceInput = tr.querySelector('.price-input');
+        const stockBadge = tr.querySelector('.stock-badge');
+        let debounceTimer;
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            hiddenIdInput.value = '';
+            const query = this.value.trim();
+
+            if (query.length < 1) {
+                resultsBox.classList.add('hidden');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetch(`/api/products/search?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(products => {
+                        resultsBox.innerHTML = '';
+                        if (products.length === 0) {
+                            resultsBox.innerHTML = `<div class="p-3 text-gray-400 text-center italic">No products found</div>`;
+                        } else {
+                            products.forEach(product => {
+                                const item = document.createElement('div');
+                                item.className = 'p-3 hover:bg-indigo-50/60 cursor-pointer flex justify-between items-center transition';
+                                item.innerHTML = `
+                                    <div>
+                                        <p class="font-bold text-gray-800 text-xs">${product.name}</p>
+                                        <p class="text-[10px] text-gray-400">Stock: ${product.stock}</p>
+                                    </div>
+                                    <span class="font-extrabold text-indigo-600 text-xs">${parseFloat(product.price).toFixed(2)} TND</span>
+                                `;
+                                item.addEventListener('click', () => {
+                                    searchInput.value = product.name;
+                                    hiddenIdInput.value = product.id;
+                                    priceInput.value = parseFloat(product.price).toFixed(2);
+                                    
+                                    stockBadge.dataset.stock = product.stock;
+                                    stockBadge.textContent = product.stock === 0 ? "Out of Stock!" : `Max: ${product.stock}`;
+                                    stockBadge.className = `stock-badge block text-[10px] text-center ${product.stock === 0 ? 'text-red-500 font-bold' : 'text-gray-400 font-medium'} mt-1`;
+
+                                    resultsBox.classList.add('hidden');
+                                    validateRow(tr);
+                                });
+                                resultsBox.appendChild(item);
+                            });
+                        }
+                        resultsBox.classList.remove('hidden');
+                    });
+            }, 200);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+                resultsBox.classList.add('hidden');
+            }
+        });
+    }
+
+    function validateRow(tr) {
+        const qtyInput = tr.querySelector('.qty-input');
+        const priceInput = tr.querySelector('.price-input');
+        const stockBadge = tr.querySelector('.stock-badge');
+        const subtotalCell = tr.querySelector('.subtotal-cell');
+
+        const stock = parseInt(stockBadge.dataset.stock) || 0;
+        const currentQty = parseInt(qtyInput.value) || 0;
+
+        if (currentQty > stock && stock > 0) {
+            stockBadge.textContent = `Exceeds Stock (${stock})!`;
+            stockBadge.className = "stock-badge block text-[10px] text-center text-red-600 font-bold mt-1";
+            qtyInput.classList.add('border-red-400', 'bg-red-50');
+        } else if (stock > 0) {
+            stockBadge.textContent = `Max: ${stock}`;
+            stockBadge.className = "stock-badge block text-[10px] text-center text-gray-400 font-medium mt-1";
+            qtyInput.classList.remove('border-red-400', 'bg-red-50');
+        }
+
+        const unitPrice = parseFloat(priceInput.value) || 0;
+        const subtotal = currentQty * unitPrice;
+        subtotalCell.textContent = subtotal.toFixed(2) + ' TND';
+
+        calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+        let total = 0;
+        tbody.querySelectorAll('.item-row').forEach(tr => {
+            const qty = parseFloat(tr.querySelector('.qty-input').value) || 0;
+            const price = parseFloat(tr.querySelector('.price-input').value) || 0;
+            total += (qty * price);
+        });
+        grandTotalEl.textContent = total.toFixed(2) + ' TND';
+    }
+
+    tbody.addEventListener('input', (e) => {
+        const tr = e.target.closest('.item-row');
+        if (tr && (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input'))) {
+            validateRow(tr);
+        }
+    });
+
+    tbody.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-row-btn')) {
+            if (tbody.querySelectorAll('.item-row').length > 1) {
+                e.target.closest('.item-row').remove();
+                calculateGrandTotal();
+            }
+        }
+    });
+
+    if (addProductBtn) {
+        addProductBtn.addEventListener('click', () => createRow());
+    }
+
+    // Initialize the table with one empty item row on load
+    createRow();
+});
