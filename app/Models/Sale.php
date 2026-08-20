@@ -84,23 +84,23 @@ class Sale extends Model
     /**
      * Payment Status Badge Logic
      */
-    public function getPaymentStatusAttribute(): string
+    public function getPaymentStatusAttribute()
     {
-        if ($this->status === 'cancelled') {
-            return 'cancelled';
+        if ($this->status === 'canceled') {
+            return null;
         }
 
-        $paid = $this->amount_paid;
-        $total = $this->total_amount;
+        $paid = $this->amount_paid ?? 0;
+        $total = $this->total_amount ?? 0;
 
-        if ($paid <= 0) {
-            return 'unpaid';
+        if ($paid >= $total && $total > 0) {
+            return 'paid';
         }
 
-        if ($paid < $total) {
+        if ($paid > 0 && $paid < $total) {
             return 'partial';
         }
 
-        return 'paid';
+        return 'unpaid';
     }
 }

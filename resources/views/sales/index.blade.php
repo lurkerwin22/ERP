@@ -178,8 +178,8 @@
                                 <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase">Customer</th>
                                 <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase">Date</th>
                                 <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Total</th>
-                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Remaining</th>
-                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-center">Status</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Status</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-center">payement</th>
                                 <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Action</th>
                             </tr>
                         </thead>
@@ -198,8 +198,17 @@
                                     <td class="px-6 py-4 text-right font-medium text-gray-900">
                                         {{ number_format($sale->total, 2) }} TND
                                     </td>
-                                    <td class="px-6 py-4 text-right font-bold {{ $sale->remaining_balance > 0 ? 'text-red-600' : 'text-green-600' }}">
-                                        {{ number_format($sale->remaining_balance, 2) }} TND
+                                    <!-- Order Status Column -->
+                                    <td class="px-4 py-3 text-center">
+                                        @if(in_array(strtolower($sale->status), ['canceled', 'cancelled']))
+                                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700 uppercase">
+                                                Canceled
+                                            </span>
+                                        @else
+                                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700 uppercase">
+                                                Confirmed
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         @if($sale->remaining_balance <= 0)

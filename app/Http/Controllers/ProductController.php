@@ -17,6 +17,7 @@ class ProductController extends Controller
         $query = Product::query()->with('category');
 
         // 1. Global Search
+
         if ($request->filled('search')) {
             $search = $request->input('search');
 
@@ -193,5 +194,29 @@ class ProductController extends Controller
         $products = $category->products()->latest()->paginate(10);
 
         return view('products.index', compact('products', 'category'));
+    }
+    public function search(Request $request)
+    {
+        $query = trim($request->get('q', ''));
+
+        if (strlen($query) < 1) {
+            return response()->json([]);
+        }
+
+        $products = Product::query()
+            ->where('stock', '>', 0)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%");
+                
+                // Checks sku column if present in table
+                if (\Schema::hasColumn('products', 'sku')) {
+                    $q->orWhere('sku', 'like', "%{$query}%");
+                }
+            })
+            ->select(['id', 'name', 'price', 'stock'])
+            ->limit(10)
+            ->get();
+
+        return response()->json($products);
     }
 }

@@ -94,4 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
     Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
 
+    // Search API Route for New Sale Live Search
+    Route::get('/api/products/search', [ProductController::class, 'search'])->name('products.search');
+
 });
