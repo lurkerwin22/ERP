@@ -4,7 +4,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Sales</h1>
-                <p class="text-sm text-gray-500">Track customer orders, sales totals, and order statuses.</p>
+                <p class="text-sm text-gray-500">Track customer orders, sales totals, and payment statuses.</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
@@ -57,7 +57,8 @@
                         <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Sale #</th>
                         <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Customer</th>
                         <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Order Status</th>
+                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Payment Status</th>
                         <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Total</th>
                         <th class="px-6 py-3.5 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -88,8 +89,31 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @switch($sale->payment_status)
+                                    @case('paid')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
+                                        </span>
+                                        @break
+                                    @case('partial')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Partial
+                                        </span>
+                                        @break
+                                    @case('cancelled')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> N/A
+                                        </span>
+                                        @break
+                                    @default
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Unpaid
+                                        </span>
+                                @endswitch
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                {{ number_format($sale->total, 2) }} TND
+                                {{ number_format($sale->total_amount, 2) }} TND
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 <a href="{{ route('sales.show', $sale) }}" class="text-indigo-600 hover:text-indigo-900">View</a>
@@ -97,7 +121,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500 font-medium">
+                            <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500 font-medium">
                                 No sales recorded yet.
                             </td>
                         </tr>

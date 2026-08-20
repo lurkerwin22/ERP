@@ -16,19 +16,20 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $query = Sale::with(['customer', 'payments']);
 
-        $sales = Sale::with(['customer', 'saleItems'])
-            ->when($search, function ($query, $search) {
-                return $query->whereHas('customer', function ($q) use ($search) {
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('id', $search)
+                ->orWhere('customer_name', 'like', "%{$search}%")
+                ->orWhereHas('customer', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%");
-                })->orWhere('id', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+                });
+        }
 
-        return view('sales.index', compact('sales', 'search'));
+        $sales = $query->latest('sale_date')->paginate(10);
+
+        return view('sales.index', compact('sales'));
     }
 
     /**
