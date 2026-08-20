@@ -16,20 +16,94 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Sale::with(['customer', 'payments']);
+        $query = Sale::query()->with(['customer', 'payments']);
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('id', $search)
+        // 1. Text Search (Sale Ref ID or Customer Name)
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
                 ->orWhere('customer_name', 'like', "%{$search}%")
-                ->orWhereHas('customer', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
+                ->orWhereHas('customer', function ($cq) use ($search) {
+                    $cq->where('name', 'like', "%{$search}%");
                 });
+            });
         }
 
-        $sales = $query->latest('sale_date')->paginate(10);
+        // 2. Sale Status Filter
+        if ($status = $request->input('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
 
-        return view('sales.index', compact('sales'));
+        // 3. Payment Status Filter
+        if ($paymentStatus = $request->input('payment_status')) {
+            if ($paymentStatus === 'paid') {
+                $query->whereRaw('(total - (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payments.sale_id = sales.id)) <= 0')
+                    ->where('status', '!=', 'cancelled');
+            } elseif ($paymentStatus === 'partial') {
+                $query->whereRaw('(SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payments.sale_id = sales.id) > 0')
+                    ->whereRaw('(total - (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payments.sale_id = sales.id)) > 0')
+                    ->where('status', '!=', 'cancelled');
+            } elseif ($paymentStatus === 'unpaid') {
+                $query->whereRaw('(SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payments.sale_id = sales.id) = 0')
+                    ->where('status', '!=', 'cancelled');
+            }
+        }
+
+        // 4. Customer Filter
+        if ($customerId = $request->input('customer_id')) {
+            if ($customerId !== 'all') {
+                $query->where('customer_id', $customerId);
+            }
+        }
+
+        // 5. Date Range Filter
+        if ($fromDate = $request->input('from_date')) {
+            $query->whereDate('created_at', '>=', $fromDate);
+        }
+        if ($toDate = $request->input('to_date')) {
+            $query->whereDate('created_at', '<=', $toDate);
+        }
+
+        // 6. Sorting
+        switch ($request->input('sort', 'newest')) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'total_low_high':
+                $query->orderBy('total', 'asc');
+                break;
+            case 'total_high_low':
+                $query->orderBy('total', 'desc');
+                break;
+            case 'id_asc':
+                $query->orderBy('id', 'asc');
+                break;
+            case 'id_desc':
+                $query->orderBy('id', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        // Compute stats for KPI cards
+        $allSales = Sale::where('status', '!=', 'cancelled')->with('payments')->get();
+
+        $stats = [
+            'total_sales' => $allSales->count(),
+            'paid_sales' => $allSales->filter(fn ($s) => $s->remaining_balance <= 0)->count(),
+            'unpaid_sales' => $allSales->filter(fn ($s) => $s->remaining_balance > 0)->count(),
+            'outstanding_amount' => round($allSales->sum(fn ($s) => $s->remaining_balance), 2),
+        ];
+
+        $sales = $query->paginate(15)->appends($request->query());
+        $customers = Customer::orderBy('name')->get();
+
+        // Pass $stats in compact
+        return view('sales.index', compact('sales', 'customers', 'stats'));
     }
 
     /**

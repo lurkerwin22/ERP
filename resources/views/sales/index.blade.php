@@ -1,138 +1,234 @@
 <x-layout>
-    <!-- Header Block -->
-    <div class="mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+    <div x-data="{ filtersOpen: {{ request()->hasAny(['status', 'payment_status', 'customer_id', 'from_date', 'to_date', 'min_total', 'max_total', 'sort']) ? 'true' : 'false' }} }">
+        
+        <!-- Header -->
+        <div class="mb-6 flex justify-between items-center pb-4 border-b">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Sales</h1>
-                <p class="text-sm text-gray-500">Track customer orders, sales totals, and payment statuses.</p>
+                <h1 class="text-2xl font-bold text-gray-900">Sales Dashboard</h1>
+                <p class="text-sm text-gray-500">Manage transaction histories, issue payments, and filter orders</p>
             </div>
+            <a href="{{ route('sales.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-sm transition">
+                + New Sale
+            </a>
+        </div>
 
+        <!-- Phase 7: Summary KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <span class="text-xs text-gray-500 uppercase font-semibold">Total Completed Sales</span>
+                <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ $stats['total_sales'] }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <span class="text-xs text-gray-500 uppercase font-semibold">Fully Paid</span>
+                <p class="text-2xl font-extrabold text-green-600 mt-1">{{ $stats['paid_sales'] }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <span class="text-xs text-gray-500 uppercase font-semibold">Unpaid / Partial</span>
+                <p class="text-2xl font-extrabold text-yellow-600 mt-1">{{ $stats['unpaid_sales'] }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <span class="text-xs text-gray-500 uppercase font-semibold">Outstanding Balance</span>
+                <p class="text-2xl font-extrabold text-red-600 mt-1">{{ number_format($stats['outstanding_amount'], 2) }} TND</p>
+            </div>
+        </div>
+
+        <!-- Phase 3: Search Bar & Filters Trigger -->
+        <form method="GET" action="{{ route('sales.index') }}" class="mb-6">
             <div class="flex flex-wrap items-center gap-3">
-                <!-- Search Form -->
-                <form action="{{ route('sales.index') }}" method="GET" class="flex items-center gap-2">
-                    <input 
-                        type="text" 
-                        name="search" 
-                        placeholder="Search sale ID or customer..." 
-                        value="{{ request('search') }}" 
-                        class="px-3.5 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-60"
-                    />
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg shadow-sm transition-colors">
-                        Search
-                    </button>
-                    @if(request('search'))
-                        <a href="{{ route('sales.index') }}" class="text-sm text-gray-500 hover:text-gray-700 underline px-1">
-                            Clear
-                        </a>
-                    @endif
-                </form>
-
-                <!-- New Sale Button -->
-                <a href="{{ route('sales.create') }}" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors whitespace-nowrap">
-                    + New Sale
-                </a>
+                <div class="flex-1 min-w-[240px]">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search sale ID or customer..." class="w-full border-gray-300 rounded-lg text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2">
+                </div>
+                <button type="submit" class="px-4 py-2 bg-gray-900 hover:bg-black text-white font-bold rounded-lg text-sm shadow-sm">
+                    Search
+                </button>
+                <button type="button" @click="filtersOpen = !filtersOpen" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-lg text-sm shadow-sm hover:bg-gray-50 flex items-center gap-2">
+                    <span>Filters</span>
+                    <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full" x-show="filtersOpen">Open</span>
+                </button>
+                @if(request()->query())
+                    <a href="{{ route('sales.index') }}" class="text-xs text-red-600 hover:underline font-semibold">Clear all</a>
+                @endif
             </div>
-        </div>
-    </div>
 
-    <!-- Alert Messages -->
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 font-medium rounded shadow-sm">
-            {{ session('success') }}
-        </div>
-    @endif
+            <!-- Phase 3 & 4: Collapsible Filters Panel -->
+            <div x-show="filtersOpen" x-collapse class="mt-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    
+                    <!-- 1. Sale Status -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Status</label>
+                        <select name="status" class="w-full border-gray-300 rounded-lg text-sm">
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
+                    </div>
 
-    @if($errors->has('cancel'))
-        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 font-medium rounded shadow-sm">
-            {{ $errors->first('cancel') }}
-        </div>
-    @endif
+                    <!-- 2. Payment Status -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Payment</label>
+                        <select name="payment_status" class="w-full border-gray-300 rounded-lg text-sm">
+                            <option value="" {{ request('payment_status') == '' ? 'selected' : '' }}>All</option>
+                            <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                            <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                            <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+                        </select>
+                    </div>
 
-    <!-- Table Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
-        <div class="overflow-x-auto w-full">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Sale #</th>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Customer</th>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Order Status</th>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Payment Status</th>
-                        <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase tracking-wider">Total</th>
-                        <th class="px-6 py-3.5 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    @forelse($sales as $sale)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                #{{ $sale->id }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800">
-                                {{ $sale->customer_name ?? optional($sale->customer)->name ?? 'Walk-in Customer' }}
-                                @if(is_null($sale->customer_id) && $sale->customer_name && $sale->customer_name !== 'Walk-in Customer')
-                                    <span class="text-xs text-gray-400 block">(Deleted Customer)</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($sale->sale_date)->format('M d, Y H:i') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($sale->status === 'completed')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Completed
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Cancelled
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @switch($sale->payment_status)
-                                    @case('paid')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
-                                        </span>
-                                        @break
-                                    @case('partial')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Partial
-                                        </span>
-                                        @break
-                                    @case('cancelled')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> N/A
-                                        </span>
-                                        @break
-                                    @default
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Unpaid
-                                        </span>
-                                @endswitch
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                {{ number_format($sale->total_amount, 2) }} TND
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ route('sales.show', $sale) }}" class="text-indigo-600 hover:text-indigo-900">View</a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500 font-medium">
-                                No sales recorded yet.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+                    <!-- 3. Customer -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Customer</label>
+                        <select name="customer_id" class="w-full border-gray-300 rounded-lg text-sm">
+                            <option value="all">All Customers</option>
+                            @foreach($customers as $customer)
+                                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-    <!-- Pagination -->
-    <div class="mt-6 w-full">
-        {{ $sales->links() }}
+                    <!-- 4. Date Range -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">From Date</label>
+                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="w-full border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">To Date</label>
+                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="w-full border-gray-300 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 5. Sorting -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Sorting</label>
+                        <select name="sort" class="w-full border-gray-300 rounded-lg text-sm">
+                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest first</option>
+                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest first</option>
+                            <option value="total_low_high" {{ request('sort') == 'total_low_high' ? 'selected' : '' }}>Total low → high</option>
+                            <option value="total_high_low" {{ request('sort') == 'total_high_low' ? 'selected' : '' }}>Total high → low</option>
+                            <option value="id_asc" {{ request('sort') == 'id_asc' ? 'selected' : '' }}>Sale ID ascending</option>
+                            <option value="id_desc" {{ request('sort') == 'id_desc' ? 'selected' : '' }}>Sale ID descending</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- Min/Max total optional row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Min Total (TND)</label>
+                        <input type="number" step="0.01" name="min_total" value="{{ request('min_total') }}" placeholder="0.00" class="w-full border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Max Total (TND)</label>
+                        <input type="number" step="0.01" name="max_total" value="{{ request('max_total') }}" placeholder="1000.00" class="w-full border-gray-300 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <a href="{{ route('sales.index') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg text-sm">Reset</a>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm">Apply Filters</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Phase 5: Active Filters Badges -->
+        @if(request()->hasAny(['search', 'status', 'payment_status', 'customer_id', 'from_date', 'to_date', 'min_total', 'max_total']))
+            <div class="mb-4 flex flex-wrap items-center gap-2">
+                <span class="text-xs text-gray-500 font-semibold">Active Filters:</span>
+                
+                @if(request('search'))
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                        Query: "{{ request('search') }}"
+                    </span>
+                @endif
+
+                @if(request('payment_status'))
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 uppercase">
+                        Payment: {{ request('payment_status') }}
+                    </span>
+                @endif
+
+                @if(request('status') && request('status') !== 'all')
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 uppercase">
+                        Status: {{ request('status') }}
+                    </span>
+                @endif
+
+                @if(request('from_date') || request('to_date'))
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                        Date: {{ request('from_date', '...') }} to {{ request('to_date', '...') }}
+                    </span>
+                @endif
+            </div>
+        @endif
+
+        <!-- Sales Data Table -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            @if($sales->isEmpty())
+                <div class="p-8 text-center text-gray-500">
+                    No sales matched your specific filter criteria.
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase">Sale Ref</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase">Customer</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase">Date</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Total</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Remaining</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-center">Status</th>
+                                <th class="px-6 py-3.5 text-xs font-bold text-gray-600 uppercase text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-sm">
+                            @foreach($sales as $sale)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-bold text-indigo-600">
+                                        <a href="{{ route('sales.show', $sale) }}">#{{ $sale->id }}</a>
+                                    </td>
+                                    <td class="px-6 py-4 font-semibold text-gray-900">
+                                        {{ $sale->customer?->name ?? $sale->customer_name ?? 'Walk-in Customer' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-600">
+                                        {{ $sale->created_at->format('d/m/Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-medium text-gray-900">
+                                        {{ number_format($sale->total, 2) }} TND
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-bold {{ $sale->remaining_balance > 0 ? 'text-red-600' : 'text-green-600' }}">
+                                        {{ number_format($sale->remaining_balance, 2) }} TND
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        @if($sale->remaining_balance <= 0)
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">PAID</span>
+                                        @elseif($sale->amount_paid > 0)
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">PARTIAL</span>
+                                        @else
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">UNPAID</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <a href="{{ route('sales.show', $sale) }}" class="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+
+        <!-- Phase 6: Pagination with Preserved Filters -->
+        @if($sales->hasPages())
+            <div class="mt-6">
+                {{ $sales->links() }}
+            </div>
+        @endif
+
     </div>
 </x-layout>
