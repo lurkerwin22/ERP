@@ -222,4 +222,29 @@
                 .replace(/'/g, "&#039;");
         }
     });
+    const clearBtn = document.getElementById('clear-chat-btn');
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', async function () {
+            if (!confirm('Voulez-vous vraiment effacer l\'historique ?')) return;
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const res = await fetch('/ai/clear', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (res.ok) {
+                    // Clear DOM container
+                    document.getElementById('chat-messages').innerHTML = '';
+                }
+            } catch (err) {
+                console.error('Erreur lors de la suppression:', err);
+            }
+        });
+    }
 })();

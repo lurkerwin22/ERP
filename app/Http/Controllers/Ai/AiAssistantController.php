@@ -63,4 +63,10 @@ class AiAssistantController extends Controller
             'content' => $aiContent
         ]);
     }
+    public function clear()
+    {
+        ChatMessage::truncate(); // Wipes all chat history from database
+
+        return response()->json(['status' => 'success']);
+    }
 }

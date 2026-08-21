@@ -97,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Search API Route for New Sale Live Search
     Route::get('/api/products/search', [ProductController::class, 'search'])->name('products.search');
+    Route::post('/ai/clear', [AiAssistantController::class, 'clear'])->name('ai.clear');
 
     // API Reports
     Route::get('/stock-alerts', [ReportController::class, 'stockAlerts'])->name('reports.stock');

@@ -103,6 +103,9 @@
                     <button type="submit" id="send-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 cursor-pointer shadow-xs">
                         <span>Envoyer</span>
                     </button>
+                    <button id="clear-chat-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 cursor-pointer shadow-xs">
+                        Vider la conversation
+                    </button>
                 </form>
             </div>
         </div>
