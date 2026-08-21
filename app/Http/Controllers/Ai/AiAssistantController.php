@@ -49,21 +49,18 @@ class AiAssistantController extends Controller
 
         $userContent = $validated['messages'][0]['content'];
 
-        // Save user message (removed user_id)
-        ChatMessage::create([
-            'role' => 'user',
-            'content' => $userContent,
-        ]);
-
         $response = $aiAgentService->chat($validated['messages']);
-        $aiContent = $response['content'] ?? json_encode($response);
+        $aiContent = $response['content'] ?? 'Une erreur est survenue.';
 
-        // Save AI response (removed user_id)
+        // Save strictly the cleaned assistant response
         ChatMessage::create([
             'role' => 'assistant',
             'content' => $aiContent,
         ]);
 
-        return response()->json($response);
+        return response()->json([
+            'role' => 'assistant',
+            'content' => $aiContent
+        ]);
     }
 }

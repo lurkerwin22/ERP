@@ -191,9 +191,15 @@ class ProductController extends Controller
      */
     public function category(Category $category)
     {
-        $products = $category->products()->latest()->paginate(10);
+        $products = $category->products()
+            ->with('category')
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('products.index', compact('products', 'category'));
+        $categories = Category::orderBy('name')->get();
+
+        return view('products.index', compact('products', 'categories', 'category'));
     }
     public function search(Request $request)
     {

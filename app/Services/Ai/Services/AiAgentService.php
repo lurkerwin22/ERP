@@ -124,15 +124,43 @@ class AiAgentService
                 'messages' => $messages,
             ]);
 
+        $rawContent = $res->json('choices.0.message.content', 'Une erreur est survenue.');
+
+        // Clean internal thinking tags or Markdown reasoning sections
+        $cleanContent = $this->stripThinkingProcess($rawContent);
+
         return [
             'role' => 'assistant',
-            'content' => $res->json('choices.0.message.content', 'Une erreur est survenue.')
+            'content' => $cleanContent
         ];
+    }
+
+    /**
+     * Strips reasoning blocks, <think> tags, and scratchpad headers.
+     */
+    protected function stripThinkingProcess(string $text): string
+    {
+        // 1. Remove XML <think>...</think> blocks if present
+        $text = preg_replace('/<think>[\s\S]*?<\/think>/i', '', $text);
+
+        // 2. If the response contains "Final Output Generation:" or similar markers, extract only what comes after
+        if (preg_match('/(?:Final Output Generation|Final Answer|Output):\s*(.*)/is', $text, $matches)) {
+            return trim($matches[1]);
+        }
+
+        // 3. Remove "Here\'s a thinking process:" up to the first double newline or main header
+        $text = preg_replace('/^Here\'s a thinking process:[\s\S]*?(?=\n\n|\n#|\n[A-Z0-9])/i', '', $text);
+
+        return trim($text);
     }
 
     protected function getSystemPrompt(): string
     {
-        return "Tu es un assistant virtuel ERP intelligent. Ton rôle est d'aider les utilisateurs à consulter leurs données (ventes, stocks, dettes) et à leur fournir des conseils stratégiques pour développer leur entreprise.";
+        return "Tu es un assistant virtuel ERP intelligent. Ton rôle est d'aider les utilisateurs à consulter leurs données et à leur fournir des conseils stratégiques.\n\n"
+            . "RÈGLES IMPORTANTES:\n"
+            . "1. Ne montre JAMAIS ta réflexion interne, ton processus de pensée ('thinking process'), tes étapes d'analyse, ou des balises de brouillon.\n"
+            . "2. Réponds DIRECTEMENT à l'utilisateur avec la réponse finale synthétisée.\n"
+            . "3. Sois clair, concis et directement exploitable.";
     }
 
     protected function formatSimpleToolOutput(string $toolName, array $data): string

@@ -129,9 +129,12 @@
                             <a href="{{ route('products.index') }}" class="text-xs text-blue-600 hover:underline font-medium">Clear all</a>
                         @endif
 
-                        <a href="{{ route('products.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl text-xs inline-flex items-center gap-1.5 shadow-sm transition-colors">
-                            <span>+</span> Add Product
-                        </a>
+                       @if(isset($category))
+                            <a href="{{ route('products.create', ['category' => $category->id]) }}" 
+                            class="inline-flex whitespace-nowrap px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm">
+                                New Product
+                            </a>
+                        @endif
                     </div>
                 </div>
 

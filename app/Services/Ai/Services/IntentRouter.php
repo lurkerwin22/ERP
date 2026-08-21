@@ -3,15 +3,15 @@
 namespace App\Services\Ai\Services;
 
 use App\Services\Ai\Tools\StockTool;
-use App\Services\Ai\Tools\SalesTool;
-use App\Services\Ai\Tools\CustomerDebtTool;
+use App\Services\Ai\Tools\SalesByPeriodTool;
+use App\Services\Ai\Tools\DebtTool;
 
 class IntentRouter
 {
     public function __construct(
         protected StockTool $stockTool,
-        protected SalesTool $salesTool,
-        protected CustomerDebtTool $debtTool
+        protected SalesByPeriodTool $salesTool,
+        protected DebtTool $debtTool
     ) {}
 
     public function matchAndExecute(string $message): ?array
@@ -19,8 +19,9 @@ class IntentRouter
         $input = mb_strtolower(trim($message));
 
         // 1. Stock & Inventory Intent
-        if (preg_match('/(rupture|stock|seuil|réapprovisionnement|manquer)/u', $input)) {
+        if (preg_match('/\b(rupture|stock|stocks|seuil|réapprovisionnement|réapprovisionner|manque|manquant)\b/u', $input)) {
             $data = $this->stockTool->execute([]);
+
             return [
                 'role' => 'assistant',
                 'content' => $this->formatStockResponse($data)
@@ -28,20 +29,44 @@ class IntentRouter
         }
 
         // 2. Sales Summary Intent
-        if (preg_match('/(vente|chiffre d\'affaire|ca|résumé des ventes)/u', $input)) {
-            $data = $this->salesTool->execute(['period' => 'this_month']);
-            $totalSales = number_format((float) ($data['total_sales'] ?? $data['total'] ?? 0), 2);
-            $count = $data['count'] ?? $data['sales_count'] ?? 0;
+        if (preg_match('/\b(vente|ventes|chiffre d[\'’]?affaires?|résumé des ventes|résumé vente|revenu|revenus)\b/u', $input)) {
+            $data = $this->salesTool->execute([
+                'start_date' => now()->startOfMonth()->format('Y-m-d'),
+                'end_date' => now()->endOfMonth()->format('Y-m-d'),
+            ]);
+
+            $totalRevenue = number_format(
+                (float) ($data['total_revenue_tnd'] ?? 0),
+                2,
+                '.',
+                ''
+            );
+
+            $count = (int) ($data['total_orders'] ?? 0);
+
+            $average = number_format(
+                (float) ($data['average_order_value_tnd'] ?? 0),
+                2,
+                '.',
+                ''
+            );
 
             return [
                 'role' => 'assistant',
-                'content' => "📊 **Résumé des ventes ce mois-ci :**\n- Chiffre d'affaires : **{$totalSales} TND**\n- Total commandes : **{$count}**"
+                'content' =>
+                    "📊 **Résumé des ventes ce mois-ci :**\n" .
+                    "- Chiffre d'affaires : **{$totalRevenue} TND**\n" .
+                    "- Total commandes : **{$count}**\n" .
+                    "- Panier moyen : **{$average} TND**"
             ];
         }
 
         // 3. Customer Debts Intent
-        if (preg_match('/(dette|créance|impai|débiteur|doivent)/u', $input)) {
-            $data = $this->debtTool->execute(['min_debt' => 0]);
+        if (preg_match('/\b(dette|dettes|créance|créances|impayé|impayés|débiteur|débiteurs|doivent|doit)\b/u', $input)) {
+            $data = $this->debtTool->execute([
+                'min_amount' => 0
+            ]);
+
             return [
                 'role' => 'assistant',
                 'content' => $this->formatDebtResponse($data)
@@ -53,64 +78,71 @@ class IntentRouter
 
     protected function formatStockResponse(array $data): string
     {
-        // Unwrap nested items array if present
-        $items = $data['items'] ?? $data['products'] ?? $data['data'] ?? $data;
+        $items = $data['products'] ?? $data['items'] ?? $data['data'] ?? [];
 
         if (!is_array($items) || empty($items)) {
             return "✅ Aucun produit en rupture ou proche du seuil d'alerte.";
         }
 
         $lines = ["🚨 **Alerte Stock & Ruptures :**"];
-        $count = 0;
 
-        foreach ($items as $item) {
-            if ($count >= 10) break;
+        foreach (array_slice($items, 0, 10) as $item) {
+            $name = $item['name'] ?? 'Produit inconnu';
 
-            if (is_array($item)) {
-                $name = $item['name'] ?? $item['label'] ?? 'Produit inconnu';
-                $stock = $item['stock'] ?? $item['quantity'] ?? 0;
-                $threshold = $item['alert_threshold'] ?? $item['min_stock'] ?? '-';
-                $lines[] = "- **{$name}** : {$stock} unités (Seuil: {$threshold})";
-                $count++;
-            } elseif (is_object($item)) {
-                $name = $item->name ?? 'Produit inconnu';
-                $stock = $item->stock ?? 0;
-                $threshold = $item->alert_threshold ?? '-';
-                $lines[] = "- **{$name}** : {$stock} unités (Seuil: {$threshold})";
-                $count++;
-            }
+            $stock = $item['current_stock']
+                ?? $item['stock']
+                ?? $item['quantity']
+                ?? 0;
+
+            $threshold = $item['alert_threshold']
+                ?? $item['min_stock']
+                ?? '-';
+
+            $status = ((float) $stock <= 0)
+                ? '🔴 RUPTURE'
+                : '🟠 STOCK FAIBLE';
+
+            $lines[] = "- **{$name}** : {$stock} unités " .
+                "(Seuil : {$threshold}) — {$status}";
         }
 
-        return count($lines) > 1 ? implode("\n", $lines) : "✅ Aucun produit en rupture ou proche du seuil d'alerte.";
+        return implode("\n", $lines);
     }
 
     protected function formatDebtResponse(array $data): string
     {
-        $debts = $data['debts'] ?? $data['customers'] ?? $data['data'] ?? $data;
+        $debtors = $data['debtors'] ?? [];
 
-        if (!is_array($debts) || empty($debts)) {
+        if (!is_array($debtors) || empty($debtors)) {
             return "✅ Aucun client n'a de créances en cours.";
         }
 
-        $lines = ["💰 **Clients Débiteurs :**"];
-        $count = 0;
+        $lines = [
+            "💰 **Clients Débiteurs :**"
+        ];
 
-        foreach ($debts as $d) {
-            if ($count >= 10) break;
+        foreach (array_slice($debtors, 0, 10) as $debtor) {
+            $name = $debtor['name']
+                ?? $debtor['customer_name']
+                ?? 'Client inconnu';
 
-            if (is_array($d)) {
-                $name = $d['customer_name'] ?? $d['name'] ?? 'Client inconnu';
-                $balance = number_format((float) ($d['balance'] ?? $d['debt'] ?? 0), 2);
-                $lines[] = "- **{$name}** : {$balance} TND";
-                $count++;
-            } elseif (is_object($d)) {
-                $name = $d->customer_name ?? $d->name ?? 'Client inconnu';
-                $balance = number_format((float) ($d->balance ?? 0), 2);
-                $lines[] = "- **{$name}** : {$balance} TND";
-                $count++;
-            }
+            $balance = (float) (
+                $debtor['outstanding_debt']
+                ?? $debtor['balance']
+                ?? $debtor['debt']
+                ?? 0
+            );
+
+            $balanceFormatted = number_format(
+                $balance,
+                2,
+                '.',
+                ''
+            );
+
+            $lines[] = "- **{$name}** : **{$balanceFormatted} TND**";
         }
 
-        return count($lines) > 1 ? implode("\n", $lines) : "✅ Aucun client n'a de créances en cours.";
+        return implode("\n", $lines);
     }
 }
