@@ -1,215 +1,8 @@
-// resources/js/app.js
-//
-// Cleanup notes:
-// - This file previously contained THREE overlapping implementations of the
-//   AI chat widget (#chat-form / #chat-messages). Two were older/duplicate
-//   drafts; one referenced functions that were never defined anywhere in the
-//   file (appendUserMessage, showChatSpinner, hideChatSpinner, sendToAiAgent)
-//   and would have thrown a ReferenceError the moment a chip button was
-//   clicked. Kept the single most complete, working version below.
-// - Product filter, POS "Create Sale" cart, and Quote builder sections were
-//   each unique and are preserved as-is (just tidied).
+import './chat';
 
 document.addEventListener('DOMContentLoaded', function () {
     // =========================================================================
-    // 1. AI CHAT WIDGET
-    // =========================================================================
-    const chatStream = document.getElementById('chat-messages');
-    const chatForm = document.getElementById('chat-form');
-    const userInput = document.getElementById('user-input');
-
-    if (chatForm && chatStream && userInput) {
-        const csrfToken = chatForm.querySelector('input[name="_token"]')?.value
-            || document.querySelector('meta[name="csrf-token"]')?.content;
-
-        // Handle quick-reply chip clicks
-        document.querySelectorAll('.chip-btn').forEach((button) => {
-            button.addEventListener('click', async function () {
-                const promptText = this.getAttribute('data-prompt');
-                const endpoint = this.getAttribute('data-endpoint');
-
-                appendMessage('user', promptText);
-
-                if (endpoint) {
-                    // Direct REST path for canned reports (skips the LLM round-trip)
-                    const loaderId = appendLoadingIndicator();
-                    try {
-                        const response = await fetch(endpoint, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                            },
-                        });
-                        const reportData = await response.json();
-                        removeLoadingIndicator(loaderId);
-                        appendMessage('assistant', formatReportHtml(reportData));
-                    } catch (err) {
-                        removeLoadingIndicator(loaderId);
-                        appendMessage('assistant', '⚠️ Erreur lors de la récupération du rapport.');
-                    }
-                } else {
-                    submitChatMessage(promptText);
-                }
-            });
-        });
-
-        // Handle manual form submission
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const text = userInput.value.trim();
-            if (!text) return;
-
-            appendMessage('user', text);
-            userInput.value = '';
-            submitChatMessage(text);
-        });
-
-        async function submitChatMessage(messageText) {
-            const endpoint = chatForm.getAttribute('data-endpoint');
-            const loaderId = appendLoadingIndicator();
-
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        messages: [{ role: 'user', content: messageText }],
-                    }),
-                });
-
-                const data = await response.json();
-                removeLoadingIndicator(loaderId);
-
-                const content = data.content || data.message || 'Réponse reçue.';
-                appendMessage('assistant', content);
-            } catch (err) {
-                removeLoadingIndicator(loaderId);
-                appendMessage('assistant', "⚠️ Impossible d'interroger le service IA.");
-            }
-        }
-
-        function appendMessage(role, htmlContent) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex gap-3 text-sm ${role === 'user' ? 'justify-end' : ''}`;
-
-            if (role === 'user') {
-                wrapper.innerHTML = `
-                    <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-xs px-4 py-3 max-w-xl leading-relaxed shadow-xs">
-                        ${escapeHtml(htmlContent)}
-                    </div>
-                    <div class="w-8 h-8 rounded-lg bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-xs shrink-0 shadow-xs mt-0.5">
-                        Vous
-                    </div>
-                `;
-            } else {
-                wrapper.innerHTML = `
-                    <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs mt-0.5">
-                        IA
-                    </div>
-                    <div class="bg-slate-800 text-slate-100 rounded-2xl rounded-tl-xs px-4 py-3 max-w-2xl leading-relaxed border border-slate-700/60 shadow-xs">
-                        ${htmlContent}
-                    </div>
-                `;
-            }
-
-            chatStream.appendChild(wrapper);
-            chatStream.scrollTop = chatStream.scrollHeight;
-        }
-
-        function appendLoadingIndicator() {
-            const id = 'loader-' + Date.now();
-            const wrapper = document.createElement('div');
-            wrapper.id = id;
-            wrapper.className = 'flex gap-3 text-sm';
-            wrapper.innerHTML = `
-                <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs mt-0.5">
-                    IA
-                </div>
-                <div class="bg-slate-800 text-slate-300 rounded-2xl rounded-tl-xs px-4 py-3 border border-slate-700/60 shadow-xs flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce"></span>
-                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]"></span>
-                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]"></span>
-                </div>
-            `;
-            chatStream.appendChild(wrapper);
-            chatStream.scrollTop = chatStream.scrollHeight;
-            return id;
-        }
-
-        function removeLoadingIndicator(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-        }
-
-        function formatReportHtml(report) {
-            if (report.type === 'stock') {
-                const items = report.data.items || report.data;
-                if (!Array.isArray(items) || items.length === 0) {
-                    return "✅ Aucun produit en rupture ou proche du seuil d'alerte.";
-                }
-                const list = items.slice(0, 10).map((i) => `
-                    <li class="flex justify-between items-center py-1 border-b border-slate-700/50 last:border-0">
-                        <span class="font-medium text-slate-200">${escapeHtml(i.name || i.label)}</span>
-                        <span class="text-xs px-2 py-0.5 rounded ${i.stock <= 0 ? 'bg-rose-900/60 text-rose-300' : 'bg-amber-900/60 text-amber-300'}">
-                            ${i.stock} unités (Seuil: ${i.alert_threshold || '-'})
-                        </span>
-                    </li>
-                `).join('');
-                return `<div class="font-semibold text-amber-400 mb-2">${escapeHtml(report.title)}</div><ul class="space-y-1">${list}</ul>`;
-            }
-
-            if (report.type === 'sales') {
-                const total = Number(report.data.total_sales || report.data.total || 0)
-                    .toLocaleString('fr-TN', { minimumFractionDigits: 2 });
-                const count = report.data.count || report.data.sales_count || 0;
-                return `
-                    <div class="font-semibold text-blue-400 mb-2">${escapeHtml(report.title)}</div>
-                    <div class="grid grid-cols-2 gap-3 mt-2">
-                        <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/50">
-                            <div class="text-xs text-slate-400">Chiffre d'affaires</div>
-                            <div class="text-base font-bold text-emerald-400">${total} TND</div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/50">
-                            <div class="text-xs text-slate-400">Commandes</div>
-                            <div class="text-base font-bold text-slate-200">${count}</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (report.type === 'debts') {
-                const debts = report.data.debts || report.data;
-                if (!Array.isArray(debts) || debts.length === 0) {
-                    return '✅ Aucun client débiteur en retard.';
-                }
-                const list = debts.slice(0, 10).map((d) => `
-                    <li class="flex justify-between items-center py-1 border-b border-slate-700/50 last:border-0">
-                        <span class="font-medium text-slate-200">${escapeHtml(d.customer_name || d.name)}</span>
-                        <span class="font-semibold text-rose-400">${Number(d.balance || d.debt || 0).toFixed(2)} TND</span>
-                    </li>
-                `).join('');
-                return `<div class="font-semibold text-rose-400 mb-2">${escapeHtml(report.title)}</div><ul class="space-y-1">${list}</ul>`;
-            }
-
-            return `<pre class="text-xs bg-slate-950 p-2 rounded overflow-x-auto">${escapeHtml(JSON.stringify(report.data, null, 2))}</pre>`;
-        }
-
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-    }
-
-    // =========================================================================
-    // 2. PRODUCT FILTER FORM VALIDATION
+    // 1. PRODUCT FILTER FORM VALIDATION
     // =========================================================================
     const filterForm = document.getElementById('product-filter-form');
 
@@ -251,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =========================================================================
-    // 3. POS "CREATE SALE" — PRODUCT SEARCH + CART
+    // 2. POS "CREATE SALE" — PRODUCT SEARCH + CART
     // =========================================================================
     const searchInput = document.getElementById('product-search-input');
 
@@ -434,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =========================================================================
-    // 4. QUOTE BUILDER
+    // 3. QUOTE BUILDER
     // =========================================================================
     const quoteForm = document.getElementById('quote-form');
 

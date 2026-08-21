@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Services\Ai\Services\AiAgentService;
+use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 
 class AiAssistantController extends Controller
@@ -24,14 +25,16 @@ class AiAssistantController extends Controller
             'high_debt_customers' => Customer::all()->filter(fn ($c) => $c->total_outstanding_debt > 0)->count(),
         ];
 
-        return view('ai.index', compact('alerts'));
+        // Fetch past chat history to render on load
+        $messages = ChatMessage::oldest()->take(50)->get();
+
+        return view('ai.index', compact('alerts', 'messages'));
     }
 
     public function chat(Request $request, AiAgentService $aiAgentService)
     {
         $inputMessages = $request->input('messages');
 
-        // Fallback if JS sends 'message' string instead of 'messages' array
         if (!$inputMessages && $request->has('message')) {
             $inputMessages = [
                 ['role' => 'user', 'content' => $request->input('message')]
@@ -44,7 +47,22 @@ class AiAssistantController extends Controller
             'messages' => 'required|array',
         ]);
 
+        $userContent = $validated['messages'][0]['content'];
+
+        // Save user message (removed user_id)
+        ChatMessage::create([
+            'role' => 'user',
+            'content' => $userContent,
+        ]);
+
         $response = $aiAgentService->chat($validated['messages']);
+        $aiContent = $response['content'] ?? json_encode($response);
+
+        // Save AI response (removed user_id)
+        ChatMessage::create([
+            'role' => 'assistant',
+            'content' => $aiContent,
+        ]);
 
         return response()->json($response);
     }

@@ -23,30 +23,31 @@ class AiAgentService
     public function chat(array $messages): array
     {
         $lastUserMessage = collect($messages)->where('role', 'user')->last()['content'] ?? '';
+        $isAnalysisQuery = $this->requiresDeepAnalysis($lastUserMessage);
 
         // 1. Phase 2: Instant PHP Regex Router (0 tokens)
-        if ($localResponse = $this->intentRouter->matchAndExecute($lastUserMessage)) {
+        // Skip IntentRouter if the query requires strategy, advice, or deep analysis
+        if (!$isAnalysisQuery && ($localResponse = $this->intentRouter->matchAndExecute($lastUserMessage))) {
             return $localResponse;
         }
 
-        // 2. Phase 3: Lightweight Model for Tool Identification
+        // 2. Phase 3: Tool Identification via Router LLM
         $toolCall = $this->extractToolWithSmallModel($messages);
 
         if (!$toolCall) {
-            // General conversational query: reply directly using the fast model
-            return $this->sendCompletion($this->routerModel, $messages);
+            // Conversational/Advisory query without tool execution
+            return $this->sendCompletion($this->analystModel, $messages, $this->getSystemPrompt());
         }
 
         // Execute identified ERP Tool
         $toolResult = $this->toolRegistry->execute($toolCall['name'], $toolCall['args']);
 
-        // Check if the user prompt asks for analysis/advice
-        if ($this->requiresDeepAnalysis($lastUserMessage)) {
-            // Forward data to heavy model for strategy/analysis
+        // Strategic query: pass tool results to heavy model for growth advice
+        if ($isAnalysisQuery) {
             return $this->synthesizeWithAnalystModel($messages, $toolCall['name'], $toolResult);
         }
 
-        // Simple lookup: return formatted template without calling heavy LLM
+        // Simple data lookup
         return [
             'role' => 'assistant',
             'content' => $this->formatSimpleToolOutput($toolCall['name'], $toolResult)
@@ -55,11 +56,15 @@ class AiAgentService
 
     protected function extractToolWithSmallModel(array $messages): ?array
     {
+        $formattedMessages = array_merge([
+            ['role' => 'system', 'content' => $this->getSystemPrompt()]
+        ], $messages);
+
         $response = Http::withHeaders(['Authorization' => 'Bearer ' . $this->apiKey])
             ->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model'    => $this->routerModel,
-                'messages' => $messages,
-                'tools'    => $this->toolRegistry->getTools(),
+                'model'       => $this->routerModel,
+                'messages'    => $formattedMessages,
+                'tools'       => $this->toolRegistry->getTools(),
                 'tool_choice' => 'auto',
             ]);
 
@@ -82,28 +87,36 @@ class AiAgentService
 
         $keywords = [
             // French Strategy Keywords
-            'analyse', 'pourquoi', 'stratégie', 'conseil', 'recommandation', 'optimiser', 'expliquer', 'comment', 'augmenter',
+            'analyse', 'pourquoi', 'stratégie', 'conseil', 'recommandation', 'optimiser', 'expliquer', 'comment', 'augmenter', 'améliorer',
             // English Strategy Keywords
-            'increase', 'increament', 'grow', 'boost', 'how', 'what', 'should', 'recommend', 'advice', 'strategy', 'improve'
+            'increase', 'increment', 'grow', 'boost', 'how', 'what', 'should', 'recommend', 'advice', 'strategy', 'improve', 'target'
         ];
 
-        $pattern = '/(' . implode('|', $keywords) . ')/u';
+        $pattern = '/\b(' . implode('|', $keywords) . ')\b/u';
 
         return (bool) preg_match($pattern, $prompt);
     }
 
     protected function synthesizeWithAnalystModel(array $messages, string $toolName, array $data): array
     {
-        $messages[] = [
+        $contextMessage = [
             'role' => 'system',
-            'content' => "Données extraites de l'outil {$toolName}: " . json_encode($data) . "\nAnalyse ces données et réponds de façon concise et stratégique."
+            'content' => "Tu es un expert en gestion ERP et stratégie commerciale.\n" .
+                         "Données extraites de l'outil '{$toolName}': " . json_encode($data, JSON_UNESCAPED_UNICODE) . "\n" .
+                         "Analyse ces données et réponds à la question de l'utilisateur avec des conseils stratégiques et des actions concrètes."
         ];
 
-        return $this->sendCompletion($this->analystModel, $messages);
+        $payload = array_merge([['role' => 'system', 'content' => $this->getSystemPrompt()]], $messages, [$contextMessage]);
+
+        return $this->sendCompletion($this->analystModel, $payload);
     }
 
-    protected function sendCompletion(string $model, array $messages): array
+    protected function sendCompletion(string $model, array $messages, ?string $systemPrompt = null): array
     {
+        if ($systemPrompt) {
+            array_unshift($messages, ['role' => 'system', 'content' => $systemPrompt]);
+        }
+
         $res = Http::retry(2, 1000)
             ->withHeaders(['Authorization' => 'Bearer ' . $this->apiKey])
             ->post('https://api.groq.com/openai/v1/chat/completions', [
@@ -115,6 +128,11 @@ class AiAgentService
             'role' => 'assistant',
             'content' => $res->json('choices.0.message.content', 'Une erreur est survenue.')
         ];
+    }
+
+    protected function getSystemPrompt(): string
+    {
+        return "Tu es un assistant virtuel ERP intelligent. Ton rôle est d'aider les utilisateurs à consulter leurs données (ventes, stocks, dettes) et à leur fournir des conseils stratégiques pour développer leur entreprise.";
     }
 
     protected function formatSimpleToolOutput(string $toolName, array $data): string
