@@ -1,4 +1,9 @@
 import './chat';
+import { initProductMarginCalculator } from './product-margin';
+
+document.addEventListener('DOMContentLoaded', () => {
+    initProductMarginCalculator();
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     // =========================================================================

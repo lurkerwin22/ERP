@@ -31,11 +31,25 @@ class Product extends Model
     {
         return $this->price - ($this->purchase_price ?? 0);
     }
-
-    public function getMarginPercentageAttribute(): float
+    /**
+     * Calculate absolute margin (Selling Price - Purchase Price).
+     */
+    public function getMarginAttribute(): ?float
     {
-        if (!$this->purchase_price || $this->purchase_price <= 0) {
-            return 0;
+        if (is_null($this->purchase_price) || is_null($this->price)) {
+            return null;
+        }
+
+        return (float) $this->price - (float) $this->purchase_price;
+    }
+
+    /**
+     * Calculate margin percentage based on purchase price.
+     */
+    public function getMarginPercentageAttribute(): ?float
+    {
+        if (is_null($this->purchase_price) || (float) $this->purchase_price <= 0 || is_null($this->price)) {
+            return null;
         }
 
         return (($this->price - $this->purchase_price) / $this->purchase_price) * 100;
