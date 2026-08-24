@@ -62,11 +62,21 @@ class SaleController extends Controller
         if ($fromDate = $request->input('from_date')) {
             $query->whereDate('created_at', '>=', $fromDate);
         }
+
         if ($toDate = $request->input('to_date')) {
             $query->whereDate('created_at', '<=', $toDate);
         }
 
-        // 6. Sorting
+        // 6. Total Range Filter
+        if ($request->filled('min_total')) {
+            $query->where('total', '>=', $request->input('min_total'));
+        }
+
+        if ($request->filled('max_total')) {
+            $query->where('total', '<=', $request->input('max_total'));
+        }
+
+        // 7. Sorting
         switch ($request->input('sort', 'newest')) {
             case 'oldest':
                 $query->oldest();
