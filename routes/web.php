@@ -38,7 +38,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::delete('/logout', [SessionController::class, 'destroy'])->name('logout');
+    Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
 
     // Products
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

@@ -14,7 +14,8 @@
         <x-panel>
             <form method="GET" action="{{ route('purchases.index') }}" class="flex flex-wrap gap-3 items-end">
                 <div>
-                    <x-forms.select name="supplier_id" label="Supplier">
+                    <x-forms.label name="supplier_id" label="Supplier" />
+                    <x-forms.select name="supplier_id">
                         <option value="">All Suppliers</option>
                         @foreach($suppliers as $supplier)
                             <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
@@ -25,11 +26,13 @@
                 </div>
 
                 <div>
-                    <x-forms.input type="date" name="from_date" label="From Date" value="{{ request('from_date') }}" />
+                    <x-forms.label name="from_date" label="From Date" />
+                    <x-forms.input type="date" name="from_date" value="{{ request('from_date') }}" />
                 </div>
 
                 <div>
-                    <x-forms.input type="date" name="to_date" label="To Date" value="{{ request('to_date') }}" />
+                    <x-forms.label name="to_date" label="To Date" />
+                    <x-forms.input type="date" name="to_date" value="{{ request('to_date') }}" />
                 </div>
 
                 <div class="flex gap-2">
