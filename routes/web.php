@@ -15,6 +15,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\DebtController;
+use App\Http\Controllers\PurchaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -106,5 +107,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/stock-alerts', [ReportController::class, 'stockAlerts'])->name('reports.stock');
     Route::get('/monthly-sales', [ReportController::class, 'monthlySales'])->name('reports.sales');
     Route::get('/customer-debts', [ReportController::class, 'customerDebts'])->name('reports.debts');
+
+    // Purchases
+    Route::resource('purchases', PurchaseController::class)->except(['edit', 'update', 'destroy']);
 
 });
