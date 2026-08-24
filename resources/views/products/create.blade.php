@@ -11,16 +11,32 @@
 
                 <x-forms.input label="Description" name="description" placeholder="Brief product summary..." />
 
-                <div>
-                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="category_id" name="category_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm">
-                        <option value="" {{ empty(old('category_id', $selectedCategoryId ?? '')) ? 'selected' : '' }}>No category</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ old('category_id', $selectedCategoryId ?? '') == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                
+                <!-- Category & Supplier Section -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select id="category_id" name="category_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm">
+                            <option value="" {{ empty(old('category_id', $selectedCategoryId ?? '')) ? 'selected' : '' }}>No category</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ old('category_id', $selectedCategoryId ?? '') == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="supplier_id" class="block text-sm font-medium text-gray-700 mb-1">Supplier</label>
+                        <select id="supplier_id" name="supplier_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm">
+                            <option value="">Select supplier</option>
+                            @foreach($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}" {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                    {{ $supplier->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <!-- PRICING SECTION -->

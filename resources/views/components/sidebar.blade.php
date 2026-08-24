@@ -66,7 +66,17 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Categories</span>
                     </a>
                 </li>
-
+                <!-- Suppliers -->
+                <li>
+                    <a href="{{ route('suppliers.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('suppliers.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5 transition-colors {{ request()->routeIs('suppliers.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"
+                             aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0v-5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v5m-6 0h6"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Suppliers</span>
+                    </a>
+                </li>
                 <!-- Stock -->
                 <li>
                     <a href="{{ route('stock.index') }}"

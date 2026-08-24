@@ -28,6 +28,19 @@
                         </select>
                     </div>
 
+                    <!-- Supplier (NEW) -->
+                    <div class="space-y-1.5">
+                        <label for="supplier_id" class="text-xs font-bold text-gray-700">Supplier</label>
+                        <select name="supplier_id" id="supplier_id" class="w-full rounded-lg border-gray-200 text-xs text-gray-700 focus:border-blue-500 focus:ring-blue-500 py-2">
+                            <option value="">All suppliers</option>
+                            @foreach($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                    {{ $supplier->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- Stock Status -->
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-gray-700 block">Stock Status</label>
@@ -118,6 +131,7 @@
                             $activeCount = collect([
                                 request('search'),
                                 request('category_id'),
+                                request('supplier_id'),
                                 request('stock_status'),
                                 request('min_price'),
                                 request('max_price')
@@ -129,7 +143,7 @@
                             <a href="{{ route('products.index') }}" class="text-xs text-blue-600 hover:underline font-medium">Clear all</a>
                         @endif
 
-                       @if(isset($category))
+                        @if(isset($category))
                             <a href="{{ route('products.create', ['category_id' => $category->id]) }}"
                             class="inline-flex whitespace-nowrap px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm">
                                 New Product
@@ -152,6 +166,14 @@
                             @php $selectedCat = $categories->firstWhere('id', request('category_id')); @endphp
                             <a href="{{ request()->fullUrlWithQuery(['category_id' => null]) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors">
                                 Category: {{ $selectedCat->name ?? 'Selected' }}
+                                <span class="text-blue-500 font-bold">&times;</span>
+                            </a>
+                        @endif
+
+                        @if(request('supplier_id'))
+                            @php $selectedSup = $suppliers->firstWhere('id', request('supplier_id')); @endphp
+                            <a href="{{ request()->fullUrlWithQuery(['supplier_id' => null]) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors">
+                                Supplier: {{ $selectedSup->name ?? 'Selected' }}
                                 <span class="text-blue-500 font-bold">&times;</span>
                             </a>
                         @endif

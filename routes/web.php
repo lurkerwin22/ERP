@@ -6,6 +6,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\Ai\AiAssistantController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SaleController;
@@ -56,6 +57,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
+    // Suppliers
+    Route::resource('suppliers', SupplierController::class);
+
     // Stock Management
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/products/{product}/stock', [StockController::class, 'movements'])->name('stock.movements');
@@ -87,17 +91,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/quotes/{quote}/convert', [QuoteController::class, 'convert'])->name('quotes.convert');
     Route::patch('/quotes/{quote}/status', [QuoteController::class, 'updateStatus'])->name('quotes.update-status');
 
-    //Debt 
+    // Debts 
     Route::get('/debts', [DebtController::class, 'index'])->name('debts.index');
 
     // AI Assistant
-   
     Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
     Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
+    Route::post('/ai/clear', [AiAssistantController::class, 'clear'])->name('ai.clear');
 
     // Search API Route for New Sale Live Search
     Route::get('/api/products/search', [ProductController::class, 'search'])->name('products.search');
-    Route::post('/ai/clear', [AiAssistantController::class, 'clear'])->name('ai.clear');
 
     // API Reports
     Route::get('/stock-alerts', [ReportController::class, 'stockAlerts'])->name('reports.stock');

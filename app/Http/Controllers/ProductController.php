@@ -1,20 +1,16 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with(['category', 'supplier']);
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -24,63 +20,24 @@ class ProductController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        if ($request->filled('stock_status')) {
-            if ($request->stock_status === 'in_stock') {
-                $query->where('stock', '>', 0);
-            } elseif ($request->stock_status === 'low_stock') {
-                $query->whereColumn('stock', '<=', 'alert_threshold')->where('stock', '>', 0);
-            } elseif ($request->stock_status === 'out_of_stock') {
-                $query->where('stock', 0);
-            }
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->supplier_id);
         }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        switch ($request->get('sort', 'latest')) {
-            case 'oldest':
-                $query->oldest();
-                break;
-            case 'name_asc':
-                $query->orderBy('name', 'asc');
-                break;
-            case 'name_desc':
-                $query->orderBy('name', 'desc');
-                break;
-            case 'price_asc':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_desc':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'stock_asc':
-                $query->orderBy('stock', 'asc');
-                break;
-            case 'stock_desc':
-                $query->orderBy('stock', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
-
-        $products = $query->paginate(10)->withQueryString();
+        $products = $query->latest()->paginate(10)->withQueryString();
         $categories = Category::all();
+        $suppliers = Supplier::all();
 
-        return view('products.index', compact('products', 'categories'));
+        return view('products.index', compact('products', 'categories', 'suppliers'));
     }
 
     public function create(Request $request)
     {
         $categories = Category::all();
+        $suppliers = Supplier::all();
         $selectedCategoryId = $request->query('category_id');
 
-        return view('products.create', compact('categories', 'selectedCategoryId'));
+        return view('products.create', compact('categories', 'suppliers', 'selectedCategoryId'));
     }
 
     public function store(Request $request)
@@ -88,11 +45,12 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'purchase_price' => 'nullable|numeric|min:0', // Added validation
+            'purchase_price' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'alert_threshold' => 'nullable|integer|min:0',
             'category_id' => 'nullable|exists:categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id', // Added validation
             'image' => 'nullable|string',
         ]);
 
@@ -104,7 +62,9 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::all();
-        return view('products.edit', compact('product', 'categories'));
+        $suppliers = Supplier::all();
+
+        return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
     public function update(Request $request, Product $product)
@@ -112,11 +72,12 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'purchase_price' => 'nullable|numeric|min:0', // Added validation
+            'purchase_price' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'alert_threshold' => 'nullable|integer|min:0',
             'category_id' => 'nullable|exists:categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id', // Added validation
             'image' => 'nullable|string',
         ]);
 
@@ -131,6 +92,8 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
     }
 
+    
+
     /**
      * Display products by category.
      */
@@ -143,8 +106,8 @@ class ProductController extends Controller
             ->withQueryString();
 
         $categories = Category::orderBy('name')->get();
-
-        return view('products.index', compact('products', 'categories', 'category'));
+        $suppliers = Supplier::all();
+        return view('products.index', compact('products', 'categories', 'category' , 'suppliers'));
     }
     public function search(Request $request)
     {
