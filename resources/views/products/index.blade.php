@@ -130,7 +130,7 @@
                         @endif
 
                        @if(isset($category))
-                            <a href="{{ route('products.create', ['category' => $category->id]) }}" 
+                            <a href="{{ route('products.create', ['category_id' => $category->id]) }}"
                             class="inline-flex whitespace-nowrap px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm">
                                 New Product
                             </a>
