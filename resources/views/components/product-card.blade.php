@@ -5,12 +5,12 @@
     <div class="w-full sm:w-32 h-32 flex-shrink-0  bg-indigo-50 border border-indigo-100 rounded-lg flex items-center justify-center overflow-hidden">
         @if ($product->image)
             <img 
-                src="{{ filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('storage/' . $product->image) }}" 
+                src="{{ Str::startsWith($product->image, ['http://', 'https://']) ? $product->image : asset('storage/' . $product->image) }}" 
                 alt="{{ $product->name }}" 
                 class="object-cover rounded-lg border border-gray-200"
             >
         @else
-            <div class="bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">
+            <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs font-medium">
                 No img
             </div>
         @endif

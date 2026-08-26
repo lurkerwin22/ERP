@@ -19,9 +19,9 @@
                         <div class="mb-3">
                             <span class="block text-xs font-medium text-gray-500 mb-1">Current Preview</span>
                             <img 
-                                src="{{ filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('storage/' . $product->image) }}" 
+                                src="{{ Str::startsWith($product->image, ['http://', 'https://']) ? $product->image : asset('storage/' . $product->image) }}" 
                                 alt="{{ $product->name }}" 
-                                class="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                                class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
                             >
                         </div>
                     @endif
