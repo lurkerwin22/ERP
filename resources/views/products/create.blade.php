@@ -7,7 +7,7 @@
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8">
             <x-forms.form method="POST" action="/products" class="space-y-6">
 
-                <x-forms.input label="Product Name" name="name" placeholder="e.g. Wireless Mouse" />
+                <x-forms.input label="Name" name="name" placeholder="e.g. Wireless Mouse" />
 
                 <x-forms.input label="Description" name="description" placeholder="Brief product summary..." />
 

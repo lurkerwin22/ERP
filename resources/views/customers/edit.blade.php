@@ -1,7 +1,7 @@
 <x-layout>
     <div class="mb-6 flex justify-between items-center">
         <x-page-heading>Edit Customer: {{ $customer->name }}</x-page-heading>
-        <a href="{{ route('customers.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Customers</a>
+        <a href="{{ route('customers.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900 w-1/4">&larr; Back to Customers</a>/
     </div>
 
     <x-panel class="p-6 max-w-3xl mx-auto">

@@ -1,7 +1,7 @@
 <x-layout>
     <div class="mb-6 flex justify-between items-center">
         <x-page-heading>Manage Stock: {{ $product->name ?? $product->name }}</x-page-heading>
-        <a href="{{ route('stock.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Stock Overview</a>
+        <a href="{{ route('stock.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900  w-1/4">&larr; Back to Stock Overview</a>
     </div>
 
     @if(session('success'))

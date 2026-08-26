@@ -8,7 +8,7 @@
             <x-forms.form method="POST" action="/products/{{ $product->id }}" class="space-y-6">
                 @method('PATCH')
 
-                <x-forms.input label="Product Name" name="name" :value="old('name', $product->name)" />
+                <x-forms.input label="Name" name="name" :value="old('name', $product->name)" />
 
                 <x-forms.input label="Description" name="description" :value="old('description', $product->description)" />
 

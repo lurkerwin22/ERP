@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto py-6 space-y-6">
         <div class="flex items-center justify-between">
             <x-page-heading>Suppliers</x-page-heading>
-            <a href="{{ route('suppliers.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors">
+            <a href="{{ route('suppliers.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors w-36 text-center">
                 + Add Supplier
             </a>
         </div>
