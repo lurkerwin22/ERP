@@ -31,10 +31,6 @@
                         <x-forms.button class="w-full py-2.5 justify-center">
                             Log In
                         </x-forms.button>
-
-                        <a href="/register" class="w-full text-center bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-lg border border-gray-300 transition-colors">
-                            Create an account
-                        </a>
                     </div>
                 </x-forms.form>
             </div>
