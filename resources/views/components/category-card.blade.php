@@ -1,7 +1,7 @@
 @props(['category'])
 
 <div
-    class="relative flex flex-col justify-between p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-shadow"
+    class="relative flex flex-col justify-between p-6 bg-white border border-gray-400 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-shadow"
     x-data="{ showModal: false }"
 >
         <div
