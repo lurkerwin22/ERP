@@ -23,6 +23,10 @@
                     <x-forms.input label="Email" name="email" type="email" autocomplete="username" required />
                     <x-forms.input label="Password" name="password" type="password" autocomplete="current-password" required />
 
+                    <div class="flex justify-end -mt-2">
+                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-700">Forgot password?</a>
+                    </div>
+
                     <div class="flex flex-col gap-y-3 pt-2">
                         <x-forms.button class="w-full py-2.5 justify-center">
                             Log In

@@ -15,8 +15,8 @@
 
             <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
                 <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900">Create an account</h2>
-                    <p class="text-sm text-gray-500 mt-1">Fill in your details to get started.</p>
+                    <h2 class="text-xl font-semibold text-gray-900">Create the first administrator</h2>
+                    <p class="text-sm text-gray-500 mt-1">This one-time setup creates the initial superadmin account.</p>
                 </div>
 
                 <x-forms.form method="POST" action="/register" enctype="multipart/form-data" class="space-y-5">

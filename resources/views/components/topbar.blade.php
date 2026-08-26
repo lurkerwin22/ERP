@@ -43,9 +43,13 @@
                     <span class="sr-only">Open user menu</span>
 
                     <!-- User Avatar -->
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600 ring-2 ring-gray-200 group-hover:ring-indigo-500">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </div>
+                    @if(auth()->user()->profile_photo)
+                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="{{ auth()->user()->name }}" class="h-8 w-8 rounded-full object-cover ring-2 ring-gray-200 group-hover:ring-indigo-500">
+                    @else
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600 ring-2 ring-gray-200 group-hover:ring-indigo-500">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                    @endif
 
                     <!-- User Name -->
                     <span class="hidden lg:flex lg:items-center">
@@ -90,7 +94,7 @@
 
                     <!-- Profile -->
                     <a
-                        href="#"
+                        href="{{ route('profile.edit') }}"
                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         role="menuitem"
                     >
@@ -99,7 +103,7 @@
 
                     <!-- Settings -->
                     <a
-                        href="#"
+                        href="{{ route('profile.edit') }}"
                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         role="menuitem"
                     >

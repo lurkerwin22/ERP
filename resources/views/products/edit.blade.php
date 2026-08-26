@@ -30,10 +30,12 @@
                         <div>
                             <x-forms.input 
                                 label="Upload New File" 
-                                name="image_file" 
+                                name="image_file"
+                                id="product-image-file"
                                 type="file" 
                                 accept="image/*" 
                             />
+                            <img id="product-image-preview" class="hidden mt-3 w-28 h-28 rounded-xl object-cover border border-slate-200" alt="New image preview">
                         </div>
                         <div>
                             <x-forms.input 
@@ -127,4 +129,17 @@
     </div>
 
   
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('product-image-file');
+    const preview = document.getElementById('product-image-preview');
+    if (!input || !preview) return;
+    input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('hidden');
+    });
+});
+</script>
 </x-layout>

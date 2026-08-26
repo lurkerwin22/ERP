@@ -16,6 +16,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +31,11 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [SessionController::class, 'create'])->name('login');
     Route::post('/login', [SessionController::class, 'store']);
+
+    Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->name('password.update');
 });
 
 /*
@@ -39,6 +47,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
+
+    Route::resource('users', UserController::class)->except(['show']);
 
     // Products
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

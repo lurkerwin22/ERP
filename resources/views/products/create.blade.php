@@ -16,7 +16,8 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <x-forms.input label="Upload File from PC" name="image" type="file" accept="image/*" />
+                            <x-forms.input label="Upload File from PC" name="image_file" id="product-image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" />
+                            <img id="product-image-preview" class="hidden mt-3 w-28 h-28 rounded-xl object-cover border border-slate-200" alt="Image preview">
                         </div>
                         <div>
                             <x-forms.input label="Or External Image URL" name="image_url" placeholder="https://example.com/image.jpg" :value="old('image_url')" />
@@ -91,4 +92,17 @@
             </x-forms.form>
         </div>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('product-image-file');
+    const preview = document.getElementById('product-image-preview');
+    if (!input || !preview) return;
+    input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('hidden');
+    });
+});
+</script>
 </x-layout>

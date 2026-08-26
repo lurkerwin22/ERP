@@ -150,6 +150,15 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Quotes</span>
                     </a>
                 </li>
+                @if(auth()->user()->role === 'superadmin')
+                <li>
+                    <a href="{{ route('users.index') }}" class="flex items-center px-3 py-2.5 text-sm rounded-xl transition-all duration-150 {{ request()->routeIs('users.*') ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }} group">
+                        <svg class="shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 5a4 4 0 0 1 4 4v2"/></svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Users</span>
+                    </a>
+                </li>
+                @endif
+
                 <li>
                     <a href="{{ route('ai.index') }}" 
                     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition {{ request()->routeIs('ai.*') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800' }}">
