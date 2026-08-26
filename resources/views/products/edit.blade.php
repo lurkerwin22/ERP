@@ -5,15 +5,46 @@
         </div>
 
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8">
-            <x-forms.form method="POST" action="/products/{{ $product->id }}" class="space-y-6">
+            <x-forms.form method="POST" action="/products/{{ $product->id }}" enctype="multipart/form-data" class="space-y-6">
                 @method('PATCH')
 
                 <x-forms.input label="Product Name" name="name" :value="old('name', $product->name)" />
 
                 <x-forms.input label="Description" name="description" :value="old('description', $product->description)" />
 
-              
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+               <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500">Product Image</h4>
+
+                    @if ($product->image)
+                        <div class="mb-3">
+                            <span class="block text-xs font-medium text-gray-500 mb-1">Current Preview</span>
+                            <img 
+                                src="{{ filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('storage/' . $product->image) }}" 
+                                alt="{{ $product->name }}" 
+                                class="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                            >
+                        </div>
+                    @endif
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <x-forms.input 
+                                label="Upload New File" 
+                                name="image_file" 
+                                type="file" 
+                                accept="image/*" 
+                            />
+                        </div>
+                        <div>
+                            <x-forms.input 
+                                label="Or Image URL" 
+                                name="image_url" 
+                                placeholder="https://example.com/image.jpg" 
+                                :value="old('image_url', filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : '')" 
+                            />
+                        </div>
+                    </div>
+                </div> 
                     <div>
                         <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                         <select id="category_id" name="category_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm">

@@ -5,14 +5,25 @@
         </div>
 
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8">
-            <x-forms.form method="POST" action="/products" class="space-y-6">
+            <x-forms.form method="POST" action="/products" enctype="multipart/form-data" class="space-y-6">
 
                 <x-forms.input label="Product Name" name="name" placeholder="e.g. Wireless Mouse" />
 
                 <x-forms.input label="Description" name="description" placeholder="Brief product summary..." />
 
-                
-                <!-- Category & Supplier Section -->
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500">Product Image</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <x-forms.input label="Upload File from PC" name="image" type="file" accept="image/*" />
+                        </div>
+                        <div>
+                            <x-forms.input label="Or External Image URL" name="image_url" placeholder="https://example.com/image.jpg" :value="old('image_url')" />
+                        </div>
+                    </div>
+                </div>                
+                <!--  Category & Supplier Section -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>

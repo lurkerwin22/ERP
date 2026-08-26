@@ -5,6 +5,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -40,24 +41,6 @@ class ProductController extends Controller
         return view('products.create', compact('categories', 'suppliers', 'selectedCategoryId'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'purchase_price' => 'nullable|numeric|min:0',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'alert_threshold' => 'nullable|integer|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'supplier_id' => 'nullable|exists:suppliers,id', // Added validation
-            'image' => 'nullable|string',
-        ]);
-
-        Product::create($validated);
-
-        return redirect()->route('products.index')->with('success', 'Product created successfully.');
-    }
 
     public function edit(Product $product)
     {
@@ -67,23 +50,66 @@ class ProductController extends Controller
         return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'purchase_price' => 'nullable|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'alert_threshold' => 'required|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'image_file' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif|max:2048',
+            'image_url' => 'nullable|url|max:1000',
+        ]);
+
+        $data = $request->except(['image_file', 'image_url']);
+
+        if ($request->hasFile('image_file')) {
+            $data['image'] = $request->file('image_file')->store('products', 'public');
+        } elseif ($request->filled('image_url')) {
+            $data['image'] = $request->input('image_url');
+        }
+
+        Product::create($data);
+
+        return redirect('/products')->with('success', 'Product created successfully.');
+    }
+
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'purchase_price' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
+            'purchase_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'alert_threshold' => 'nullable|integer|min:0',
+            'alert_threshold' => 'required|integer|min:0',
             'category_id' => 'nullable|exists:categories,id',
-            'supplier_id' => 'nullable|exists:suppliers,id', // Added validation
-            'image' => 'nullable|string',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'image_file' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif|max:2048',
+            'image_url' => 'nullable|url|max:1000',
         ]);
 
-        $product->update($validated);
+        $data = $request->except(['image_file', 'image_url']);
 
-        return redirect()->route('products.index')->with('success', 'Product updated successfully.');
+        if ($request->hasFile('image_file')) {
+            if ($product->image && !filter_var($product->image, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->file('image_file')->store('products', 'public');
+        } elseif ($request->filled('image_url')) {
+            if ($product->image && !filter_var($product->image, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->input('image_url');
+        }
+
+        $product->update($data);
+
+        return redirect('/products')->with('success', 'Product updated successfully.');
     }
 
     public function destroy(Product $product)
