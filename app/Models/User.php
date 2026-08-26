@@ -22,6 +22,30 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    public const ROLES = ['superadmin', 'manager', 'employee'];
+
+    public const STATUSES = ['active', 'inactive'];
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('superadmin');
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
     protected function casts(): array
     {
         return [

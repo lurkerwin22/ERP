@@ -27,10 +27,10 @@ class RegisteredUserController extends Controller
         $userAttributes = $request->validate([
             'name' => ['required'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Password::min(6)],
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        $userAttributes['role'] = User::count() === 0 ? 'superadmin' : 'employee';
+        $userAttributes['role'] = 'superadmin';
         $userAttributes['status'] = 'active';
 
         $user = User::create($userAttributes);

@@ -25,7 +25,7 @@ class SessionController extends Controller
             ]);
         }
 
-        if (Auth::user()->status !== 'active') {
+        if (! Auth::user()->isActive()) {
             Auth::logout();
             throw ValidationException::withMessages([
                 'email' => 'This account is currently inactive. Please contact an administrator.',

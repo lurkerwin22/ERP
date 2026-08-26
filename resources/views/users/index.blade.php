@@ -1,7 +1,7 @@
 <x-layout>
     <div class="space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <x-page-heading>Users</x-page-heading>
+            <div><x-page-heading>Users</x-page-heading><p class="mt-1 text-sm text-slate-500">Manage employees, managers and superadmins. Only superadmins can access this area.</p></div>
             <x-forms.link-button href="{{ route('users.create') }}">+ Add user</x-forms.link-button>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">

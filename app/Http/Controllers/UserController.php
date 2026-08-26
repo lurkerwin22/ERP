@@ -10,7 +10,7 @@ class UserController extends Controller
 {
     private function authorizeUserManagement(Request $request): void
     {
-        abort_unless($request->user()?->role === 'superadmin', 403);
+        abort_unless($request->user()?->isSuperAdmin(), 403, 'Only superadmins can manage users.');
     }
 
     public function index(Request $request)
@@ -75,6 +75,10 @@ class UserController extends Controller
             return back()->withErrors(['status' => 'You cannot deactivate your own account.']);
         }
 
+        if ($user->is($request->user()) && $request->role !== 'superadmin') {
+            return back()->withErrors(['role' => 'You cannot remove your own superadmin role.']);
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
@@ -88,6 +92,16 @@ class UserController extends Controller
             unset($data['password']);
         }
 
+        if ($user->isSuperAdmin() && ($data['role'] ?? $user->role) !== 'superadmin') {
+            $remaining = User::where('role', 'superadmin')
+                ->where('id', '!=', $user->getKey())
+                ->exists();
+
+            if (! $remaining) {
+                return back()->withErrors(['role' => 'The last superadmin cannot be demoted. Create another superadmin first.']);
+            }
+        }
+
         $user->update($data);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
@@ -98,6 +112,16 @@ class UserController extends Controller
         $this->authorizeUserManagement(request());
         if ($user->is($request->user())) {
             return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        if ($user->isSuperAdmin()) {
+            $remaining = User::where('role', 'superadmin')
+                ->where('id', '!=', $user->getKey())
+                ->exists();
+
+            if (! $remaining) {
+                return back()->with('error', 'The last superadmin cannot be deleted. Create another superadmin first.');
+            }
         }
 
         $user->delete();

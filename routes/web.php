@@ -52,7 +52,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
 
-    Route::resource('users', UserController::class)->except(['show']);
+    Route::middleware('role:superadmin')->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
+    });
 
     // Products
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

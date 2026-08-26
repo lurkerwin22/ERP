@@ -44,3 +44,14 @@ npm run dev
 
 ## Validation note
 PHP source files were syntax-checked successfully. Full Laravel migration/tests could not be executed in this environment because the PHP SQLite PDO driver is unavailable, and the uploaded `node_modules` installation could not be rebuilt in the sandbox.
+
+## Superadmin and roles (2026-08-26)
+
+- Added `RoleMiddleware` and registered the `role` middleware alias.
+- Protected `/users/*` with `role:superadmin`.
+- Added `User::ROLES`, role helpers, `isSuperAdmin()` and `isActive()`.
+- Added `app:make-superadmin {email}` for existing databases.
+- The first public registration is the initial superadmin; public registration remains disabled after the first account.
+- Prevented self-deactivation/self-demotion and prevented removing the last superadmin.
+- Updated the sidebar to use the role helper and the topbar to show the current role.
+- Fixed topbar logout to use the POST logout route.

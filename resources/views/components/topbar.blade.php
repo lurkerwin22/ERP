@@ -90,6 +90,9 @@
                         <p class="mt-1 text-sm font-medium text-gray-900 truncate">
                             {{ auth()->user()->email }}
                         </p>
+                        <span class="mt-2 inline-flex rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold capitalize text-indigo-700">
+                            {{ auth()->user()->role }}
+                        </span>
                     </div>
 
                     <!-- Profile -->
@@ -113,9 +116,8 @@
                     <hr class="my-1 border-gray-100">
 
                     <!-- Logout -->
-                    <form method="POST" action="/logout">
+                    <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        @method('DELETE')
 
                         <button
                             type="submit"
