@@ -8,6 +8,10 @@ import './validation';
 
 import { initProductMarginCalculator } from './product-margin';
 
-document.addEventListener('DOMContentLoaded', () => {
+// Run when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProductMarginCalculator);
+} else {
+    // DOM is already ready
     initProductMarginCalculator();
-});
+}

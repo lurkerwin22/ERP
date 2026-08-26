@@ -2,7 +2,8 @@
     'label' => false, 
     'name', 
     'type' => 'text',
-    'required' => false
+    'required' => false,
+    'value' => null
 ])
 
 @php
@@ -19,21 +20,19 @@
         'id' => $name,
         'name' => $name,
         'class' => "{$baseClasses} {$stateClasses}",
-        'value' => old($name),
+        'value' => old($name, $value),
         'required' => $required
     ];
 @endphp
+
 <x-forms.field :$label :$name :$required>
     @if($type === 'password')
         <div class="relative">
-            <input 
-                {{ $attributes($defaults) }}
-                
-            >
+            <input {{ $attributes->merge($defaults) }}>
 
             <button
                 type="button"
-                onclick="togglePassword('{{ $name }}', this)"
+                onclick="togglePassword('{{ $attributes->get('id', $name) }}', this)"
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
                 tabindex="-1"
             >
@@ -57,23 +56,15 @@
             </button>
         </div>
 
-        {{-- Live validation error --}}
-        <p
-            data-validation-error="{{ $name }}"
-            class="hidden mt-1 text-sm text-red-500"
-        ></p>
-
+        <p data-validation-error="{{ $name }}" class="hidden mt-1 text-sm text-red-500"></p>
     @else
-        <input {{ $attributes($defaults) }}>
+        <input {{ $attributes->merge($defaults) }}>
 
-        {{-- Live validation error --}}
-        <p
-            data-validation-error="{{ $name }}"
-            class="hidden mt-1 text-sm text-red-500"
-        ></p>
+        <p data-validation-error="{{ $name }}" class="hidden mt-1 text-sm text-red-500"></p>
     @endif
 </x-forms.field>
 
+@once
 <script>
     function togglePassword(inputId, button) {
         const input = document.getElementById(inputId);
@@ -82,14 +73,13 @@
 
         if (input.type === 'password') {
             input.type = 'text';
-
             eyeOpen.classList.add('hidden');
             eyeClosed.classList.remove('hidden');
         } else {
             input.type = 'password';
-
             eyeOpen.classList.remove('hidden');
             eyeClosed.classList.add('hidden');
         }
     }
 </script>
+@endonce

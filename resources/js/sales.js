@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
      // =========================================================================
     // 2. POS "CREATE SALE" — PRODUCT SEARCH + CART
     // =========================================================================
-    const searchInput = document.getElementById('product-search-input');
 
     if (searchInput) {
         const searchResults = document.getElementById('search-results-dropdown');
