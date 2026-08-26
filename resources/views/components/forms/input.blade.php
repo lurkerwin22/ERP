@@ -28,7 +28,4 @@
 <x-forms.field :$label :$name :$required>
     <input {{ $attributes($defaults) }}>
 
-    @error($name)
-        <p class="mt-1.5 text-sm text-red-600 font-medium">{{ $message }}</p>
-    @enderror
 </x-forms.field>

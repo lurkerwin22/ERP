@@ -5,6 +5,45 @@ document.addEventListener('DOMContentLoaded', () => {
     initProductMarginCalculator();
 });
 
+// =========================================================================
+// MOBILE SIDEBAR TOGGLE (the button uses Flowbite-style data attributes,
+// but Flowbite isn't installed, so we handle the show/hide ourselves)
+// =========================================================================
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.querySelector('[data-drawer-toggle="default-sidebar"]');
+    const sidebar = document.getElementById('default-sidebar');
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+    }
+});
+
+// =========================================================================
+// DISABLE SUBMIT BUTTONS ON FORM SUBMIT (prevents duplicate submissions)
+// =========================================================================
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) return;
+
+        form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach((btn) => {
+            // Defer so the button's own value/name is still included in the submission.
+            setTimeout(() => {
+                btn.disabled = true;
+                btn.classList.add('opacity-60', 'cursor-not-allowed');
+            }, 0);
+        });
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     // =========================================================================
     // 1. PRODUCT FILTER FORM VALIDATION

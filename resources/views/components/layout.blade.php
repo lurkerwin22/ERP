@@ -10,8 +10,8 @@
     <!-- Main wrapper spanning full screen height -->
     <div class="flex h-screen overflow-hidden">
         @auth
-        <!-- Sidebar container -->
-        <aside class="flex-shrink-0 w-64 bg-gray-900 text-white overflow-y-auto">
+        <!-- Sidebar container (the sidebar component handles its own mobile drawer/toggle) -->
+        <aside class="flex-shrink-0 sm:w-64 bg-gray-900 text-white overflow-y-auto">
             <x-sidebar/>
         </aside>
         @endauth
@@ -20,7 +20,7 @@
         <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
             @auth
             <!-- Sticky/Fixed topbar header -->
-            <header class="flex-shrink-0 z-10 bg-white border-b border-gray-200">
+            <header class="flex-shrink-0 z-10 bg-white">
                 <x-topbar />
             </header>
             @endauth

@@ -1,4 +1,4 @@
-<header class="flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm sm:px-6 lg:px-8">
+<div class="flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm sm:px-6 lg:px-8">
 
     <!-- Left Side: Expanded Search Bar -->
     <div class="flex flex-1">
@@ -128,4 +128,4 @@
         @endauth
 
     </div>
-</header>
+</div>

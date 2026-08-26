@@ -2,18 +2,18 @@
 
 <div
     onclick="window.location='{{ route('products.category', $category) }}'"
-    class="relative flex flex-col justify-between p-6 bg-white border-2 border-blue-500 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+    class="relative flex flex-col justify-between p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-shadow cursor-pointer"
     x-data="{ showModal: false }"
 >
     <!-- Category Title -->
     <div class="text-center mb-4">
-        <h3 class="text-xl font-bold text-blue-600 uppercase tracking-wide">
+        <h3 class="text-lg font-semibold text-gray-900 tracking-wide">
             {{ $category->name ?? 'CATEGORIE NAME' }}
         </h3>
     </div>
 
     <!-- Description & Stats -->
-    <div class="space-y-3 mb-6 text-sm text-blue-500 font-medium">
+    <div class="space-y-3 mb-6 text-sm text-gray-500 font-medium">
         
         <!-- Description Sentence with See More -->
         <div class="text-xs text-gray-600 leading-relaxed">
@@ -24,7 +24,7 @@
                     <button 
                         type="button"
                         onclick="event.stopPropagation(); openCategoryModal('modal-{{ $category->id }}')"
-                        class="text-blue-600 font-semibold underline hover:text-blue-800 ml-1 inline-block"
+                        class="text-indigo-600 font-semibold underline hover:text-indigo-800 ml-1 inline-block"
                     >
                         See more
                     </button>
@@ -34,9 +34,9 @@
             @endif
         </div>
 
-        <div class="flex justify-between items-center border-t border-blue-100 pt-2">
+        <div class="flex justify-between items-center border-t border-gray-100 pt-2">
             <span>nb of products:</span>
-            <span class="font-semibold text-blue-600">
+            <span class="font-semibold text-indigo-600">
                 {{ $category->products_count ?? 0 }}
             </span>
         </div>
@@ -46,9 +46,9 @@
     <a
         href="{{ route('categories.edit', $category) }}"
         onclick="event.stopPropagation()"
-        class="w-full py-2 border-2 border-blue-500 text-blue-600 font-semibold text-center rounded hover:bg-blue-50 transition-colors block"
+        class="w-full py-2 border border-gray-300 text-gray-700 font-semibold text-center rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors block"
     >
-        edit
+        Edit
     </a>
 
     <!-- Category Description Modal Popup -->
@@ -59,10 +59,10 @@
     >
         <div 
             onclick="event.stopPropagation()" 
-            class="bg-white border-2 border-blue-500 rounded-xl p-6 max-w-md w-full shadow-2xl relative"
+            class="bg-white border border-gray-200 rounded-xl p-6 max-w-md w-full shadow-2xl relative"
         >
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h4 class="text-lg font-bold text-blue-600">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                <h4 class="text-lg font-semibold text-gray-900">
                     {{ $category->name }} - Description
                 </h4>
                 <button 
@@ -82,7 +82,7 @@
                 <button 
                     type="button"
                     onclick="closeCategoryModal('modal-{{ $category->id }}')"
-                    class="px-4 py-1.5 border border-blue-500 text-blue-600 font-semibold rounded hover:bg-blue-50 text-sm transition-colors"
+                    class="px-4 py-1.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 text-sm transition-colors"
                 >
                     Close
                 </button>
