@@ -15,8 +15,8 @@
                 <x-forms.input label="Notes" name="notes" placeholder="Payment terms, direct contact info..." />
 
                 <div class="flex items-center justify-end gap-x-3 pt-4 border-t border-gray-100">
-                    <a href="{{ route('suppliers.index') }}" class="px-4 py-2 text-sm font-semibold text-gray-700">Cancel</a>
-                    <x-forms.button class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm">Save Supplier</x-forms.button>
+                    <x-forms.link-button href="{{ route('suppliers.index') }}">Cancel</x-forms.link-button>
+                    <x-forms.button>Save Supplier</x-forms.button>
                 </div>
             </x-forms.form>
         </div>

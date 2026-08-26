@@ -1,7 +1,7 @@
 <x-layout>
     <div class="mb-6 flex justify-between items-center">
         <x-page-heading>Edit Customer: {{ $customer->name }}</x-page-heading>
-        <a href="{{ route('customers.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900 w-1/4">&larr; Back to Customers</a>/
+        <a href="{{ route('customers.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Customers</a>
     </div>
 
     <x-panel class="p-6 max-w-3xl mx-auto">
@@ -30,15 +30,16 @@
 
             <div class="mt-6 flex justify-between items-center">
                 <!-- Step 12: Delete button on the far left -->
-                <button type="button" 
-                        onclick="if(confirm('Are you sure you want to delete this customer?')) { document.getElementById('delete-customer-form').submit(); }" 
-                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md">
+                <x-forms.button 
+                    type="button" 
+                    variant="danger"
+                    onclick="if(confirm('Are you sure you want to delete this customer?')) { document.getElementById('delete-customer-form').submit(); }">
                     Delete
-                </button>
+                </x-forms.button>
 
                 <div class="flex gap-3">
-                    <a href="{{ route('customers.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300">Cancel</a>
-                    <x-forms.button class="bg-indigo-600 hover:bg-indigo-700 text-white">Update Customer</x-forms.button>
+                    <x-forms.link-button href="{{ route('customers.index') }}">Cancel</x-forms.link-button>
+                    <x-forms.button>Update Customer</x-forms.button>
                 </div>
             </div>
         </x-forms.form>

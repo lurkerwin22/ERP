@@ -43,13 +43,13 @@
     </div>
 
     <!-- Edit Button -->
-    <a
+    <x-forms.link-button
         href="{{ route('categories.edit', $category) }}"
         onclick="event.stopPropagation()"
-        class="w-full py-2 border border-gray-300 text-gray-700 font-semibold text-center rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors block"
+        class="w-full block"
     >
         Edit
-    </a>
+    </x-forms.link-button>
 
     <!-- Category Description Modal Popup -->
     <div 

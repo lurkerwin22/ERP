@@ -47,10 +47,9 @@
                 </div>
             </div>
 
-            <a href="{{ route('products.edit', $product) }}"
-               class="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
+            <x-forms.link-button href="{{ route('products.edit', $product) }}" class="px-4 py-1.5 text-sm">
                 Edit
-            </a>
+            </x-forms.link-button>
         </div>
     </div>
 </div>

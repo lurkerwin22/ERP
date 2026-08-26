@@ -17,15 +17,16 @@
                 <x-forms.input label="Notes" name="notes" :value="old('notes', $supplier->notes)" />
 
                 <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <button type="button" 
-                        onclick="if(confirm('Are you sure?')) document.getElementById('delete-supplier-form').submit();"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    <x-forms.button 
+                        type="button" 
+                        variant="danger"
+                        onclick="if(confirm('Are you sure?')) document.getElementById('delete-supplier-form').submit();">
                         Delete
-                    </button>
+                    </x-forms.button>
 
                     <div class="flex items-center gap-x-3">
-                        <a href="{{ route('suppliers.index') }}" class="px-4 py-2 text-sm font-semibold text-gray-700">Cancel</a>
-                        <x-forms.button class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm">Update Supplier</x-forms.button>
+                        <x-forms.link-button href="{{ route('suppliers.index') }}">Cancel</x-forms.link-button>
+                        <x-forms.button>Update Supplier</x-forms.button>
                     </div>
                 </div>
             </x-forms.form>

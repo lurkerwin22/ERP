@@ -7,7 +7,7 @@
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 md:p-8">
             <x-forms.form method="POST" action="/products" class="space-y-6">
 
-                <x-forms.input label="Name" name="name" placeholder="e.g. Wireless Mouse" />
+                <x-forms.input label="Product Name" name="name" placeholder="e.g. Wireless Mouse" />
 
                 <x-forms.input label="Description" name="description" placeholder="Brief product summary..." />
 
@@ -70,10 +70,10 @@
                 <x-forms.divider />
 
                 <div class="flex items-center justify-end gap-x-3 pt-2">
-                    <a href="/products" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+                    <x-forms.link-button href="/products">
                         Cancel
-                    </a>
-                    <x-forms.button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors">
+                    </x-forms.link-button>
+                    <x-forms.button>
                         Save Product
                     </x-forms.button>
                 </div>

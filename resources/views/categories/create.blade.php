@@ -1,9 +1,7 @@
 <x-layout>
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
 
-        <h1 class="text-2xl font-bold text-blue-600 mb-6">
-            Create Category
-        </h1>
+        <x-page-heading>Create Category</x-page-heading>
 
         <form method="POST" action="/categories" class="space-y-6">
             @csrf
@@ -56,20 +54,14 @@
             </div>
 
             <!-- Buttons -->
-            <div class="flex gap-4">
-                <a
-                    href="/categories"
-                    class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                >
+            <div class="flex gap-3">
+                <x-forms.link-button href="/categories">
                     Cancel
-                </a>
+                </x-forms.link-button>
 
-                <button
-                    type="submit"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
+                <x-forms.button>
                     Create Category
-                </button>
+                </x-forms.button>
             </div>
 
         </form>

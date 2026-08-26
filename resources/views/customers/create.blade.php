@@ -1,7 +1,7 @@
 <x-layout>
     <div class="mb-6 flex justify-between items-center">
         <x-page-heading>Create Customer</x-page-heading>
-        <a href="{{ route('customers.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900 w-1/4">&larr; Back to Customers</a>
+        <a href="{{ route('customers.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">&larr; Back to Customers</a>
     </div>
 
     <x-panel class="p-6 max-w-3xl mx-auto">
@@ -27,8 +27,8 @@
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('customers.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300">Cancel</a>
-                <x-forms.button class="bg-indigo-600 hover:bg-indigo-700 text-white">Create Customer</x-forms.button>
+                <x-forms.link-button href="{{ route('customers.index') }}">Cancel</x-forms.link-button>
+                <x-forms.button>Create Customer</x-forms.button>
             </div>
         </x-forms.form>
     </x-panel>

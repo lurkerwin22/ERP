@@ -8,7 +8,7 @@
             <x-forms.form method="POST" action="/products/{{ $product->id }}" class="space-y-6">
                 @method('PATCH')
 
-                <x-forms.input label="Name" name="name" :value="old('name', $product->name)" />
+                <x-forms.input label="Product Name" name="name" :value="old('name', $product->name)" />
 
                 <x-forms.input label="Description" name="description" :value="old('description', $product->description)" />
 
@@ -70,18 +70,18 @@
                 <x-forms.divider />
 
                 <div class="flex items-center justify-between pt-2">
-                    <button 
+                    <x-forms.button 
                         type="button" 
-                        onclick="if(confirm('Are you sure you want to delete this product?')) document.getElementById('delete-form').submit();"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        variant="danger"
+                        onclick="if(confirm('Are you sure you want to delete this product?')) document.getElementById('delete-form').submit();">
                         Delete
-                    </button>
+                    </x-forms.button>
 
                     <div class="flex items-center gap-x-3">
-                        <a href="/products" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+                        <x-forms.link-button href="/products">
                             Cancel
-                        </a>
-                        <x-forms.button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors">
+                        </x-forms.link-button>
+                        <x-forms.button>
                             Update Product
                         </x-forms.button>
                     </div>

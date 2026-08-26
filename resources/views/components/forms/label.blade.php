@@ -1,4 +1,4 @@
-@props(['name', 'label', 'required'=>false])
+@props(['name', 'label', 'required' => false])
 
 <label class="block text-sm font-medium text-gray-700 mb-1.5" for="{{ $name }}">
     {{ $label }}

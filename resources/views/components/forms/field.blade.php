@@ -1,8 +1,8 @@
-@props(['label', 'name'])
+@props(['label', 'name', 'required' => false])
 
 <div>
     @if ($label)
-        <x-forms.label :$name :$label />
+        <x-forms.label :$name :$label :$required />
     @endif
 
     <div class="mt-1">
