@@ -1,4 +1,4 @@
-@props(['variant' => 'secondary'])
+@props(['variant' => 'primary'])
 
 @php
     $variants = [

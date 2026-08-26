@@ -1,16 +1,19 @@
 @props(['category'])
 
 <div
-    onclick="window.location='{{ route('products.category', $category) }}'"
-    class="relative flex flex-col justify-between p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-shadow cursor-pointer"
+    class="relative flex flex-col justify-between p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-shadow"
     x-data="{ showModal: false }"
 >
-    <!-- Category Title -->
-    <div class="text-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 tracking-wide">
-            {{ $category->name ?? 'CATEGORIE NAME' }}
-        </h3>
-    </div>
+        <div
+        onclick="window.location='{{ route('products.category', $category) }}'"
+        class="cursor-pointer"
+    >
+        <!-- Category Title -->
+        <div class="text-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 tracking-wide">
+                {{ $category->name ?? 'CATEGORIE NAME' }}
+            </h3>
+        </div>
 
     <!-- Description & Stats -->
     <div class="space-y-3 mb-6 text-sm text-gray-500 font-medium">
@@ -41,15 +44,40 @@
             </span>
         </div>
     </div>
+</div>
+   <!-- Action Buttons -->
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="flex gap-3">
+            
+            <!-- Edit Button -->
+            <x-forms.link-button
+                href="{{ route('categories.edit', $category) }}"
+                onclick="event.stopPropagation()"
+                class="flex-1 block bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+                Edit
+            </x-forms.link-button>
 
-    <!-- Edit Button -->
-    <x-forms.link-button
-        href="{{ route('categories.edit', $category) }}"
-        onclick="event.stopPropagation()"
-        class="w-full block"
-    >
-        Edit
-    </x-forms.link-button>
+            <!-- Delete Button -->
+            <form
+                method="POST"
+                action="{{ route('categories.destroy', $category) }}"
+                onsubmit="event.stopPropagation(); return confirm('Are you sure you want to delete this category?');"
+                class="flex-1"
+            >
+                @csrf
+                @method('DELETE')
+
+                <x-forms.button
+                    variant="danger"
+                    class="w-full"
+                >
+                    Delete
+                </x-forms.button>
+            </form>
+
+        </div>
+    </div>
 
     <!-- Category Description Modal Popup -->
     <div 
