@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="max-w-md mx-auto my-8">
+    <div class="max-w-xl mx-auto my-8">
         <div class="mb-6 text-center">
             <x-page-heading>Log In</x-page-heading>
         </div>
