@@ -7,7 +7,7 @@
             </a>
         </div>
 
-        <x-forms.form action="{{ route('purchases.store') }}" method="POST" id="purchase-form" class="space-y-6">
+        <x-forms.form action="{{ route('purchases.store') }}" method="POST" id="purchase-form" class="space-y-6" novalidate>
             <x-panel class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <x-forms.select name="supplier_id" label="Supplier *" id="supplier_id" required>
@@ -18,10 +18,12 @@
                             </option>
                         @endforeach
                     </x-forms.select>
+                    <p data-validation-error="supplier_id" class="text-rose-500 text-xs mt-1 hidden"></p>
                 </div>
 
                 <div>
                     <x-forms.input type="date" name="purchase_date" label="Purchase Date *" id="purchase_date" value="{{ old('purchase_date', date('Y-m-d')) }}" required />
+                    <p data-validation-error="purchase_date" class="text-rose-500 text-xs mt-1 hidden"></p>
                 </div>
             </x-panel>
 
@@ -63,6 +65,7 @@
                 <x-forms.field label="Notes / Remarks" name="notes">
                     <textarea name="notes" id="notes" rows="2" class="w-full rounded-xl border-slate-200 text-sm focus:ring-indigo-500" placeholder="Optional purchase notes...">{{ old('notes') }}</textarea>
                 </x-forms.field>
+                <p data-validation-error="notes" class="text-rose-500 text-xs mt-1 hidden"></p>
             </x-panel>
 
             <div class="flex justify-end gap-3">
@@ -90,21 +93,24 @@
             });
 
             tr.innerHTML = `
-                <td class="py-3 pr-2">
+                <td class="py-3 pr-2 align-top">
                     <select name="items[${itemIndex}][product_id]" required class="product-select w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-indigo-500">
                         ${productOptions}
                     </select>
+                    <p data-validation-error="items[${itemIndex}][product_id]" class="text-rose-500 text-xs mt-1 hidden"></p>
                 </td>
-                <td class="py-3 pr-2">
-                    <input type="number" name="items[${itemIndex}][quantity]" value="1" min="1" required class="qty-input w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-indigo-500">
+                <td class="py-3 pr-2 align-top">
+                    <input type="number" name="items[${itemIndex}][quantity]" value="1" min="1" step="1" required class="qty-input w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-indigo-500">
+                    <p data-validation-error="items[${itemIndex}][quantity]" class="text-rose-500 text-xs mt-1 hidden"></p>
                 </td>
-                <td class="py-3 pr-2">
+                <td class="py-3 pr-2 align-top">
                     <input type="number" step="0.001" name="items[${itemIndex}][unit_price]" value="0.000" min="0" required class="price-input w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-indigo-500">
+                    <p data-validation-error="items[${itemIndex}][unit_price]" class="text-rose-500 text-xs mt-1 hidden"></p>
                 </td>
-                <td class="py-3 pr-2 font-semibold text-slate-700 line-total">
+                <td class="py-3 pr-2 align-top pt-5 font-semibold text-slate-700 line-total">
                     0.000 DT
                 </td>
-                <td class="py-3 text-center">
+                <td class="py-3 text-center align-top pt-4">
                     <button type="button" class="remove-btn text-rose-500 hover:text-rose-700 font-bold text-base">&times;</button>
                 </td>
             `;
@@ -121,10 +127,22 @@
                 const defaultPrice = selected.dataset.price || 0;
                 price.value = parseFloat(defaultPrice).toFixed(3);
                 recalculate();
+                
+                if (typeof validateField === 'function') {
+                    validateField(select);
+                    validateField(price);
+                }
             });
 
-            qty.addEventListener('input', recalculate);
-            price.addEventListener('input', recalculate);
+            qty.addEventListener('input', () => {
+                recalculate();
+                if (typeof validateField === 'function') validateField(qty);
+            });
+
+            price.addEventListener('input', () => {
+                recalculate();
+                if (typeof validateField === 'function') validateField(price);
+            });
 
             removeBtn.addEventListener('click', () => {
                 tr.remove();

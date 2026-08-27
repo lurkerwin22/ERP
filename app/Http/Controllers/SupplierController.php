@@ -1,22 +1,32 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SupplierController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Supplier::withCount('products');
+        $query = Supplier::withCount('products')
+            ->where('is_system', false);
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%')
-                  ->orWhere('phone', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('phone', 'like', '%' . $search . '%');
+            });
         }
 
-        $suppliers = $query->latest()->paginate(10)->withQueryString();
+        $suppliers = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('suppliers.index', compact('suppliers'));
     }
@@ -38,22 +48,37 @@ class SupplierController extends Controller
 
         Supplier::create($validated);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier created successfully.');
+        return redirect()
+            ->route('suppliers.index')
+            ->with('success', 'Supplier created successfully.');
     }
 
     public function show(Supplier $supplier)
     {
+        if ($supplier->is_system) {
+            abort(404);
+        }
+
         $supplier->load('products.category');
+
         return view('suppliers.show', compact('supplier'));
     }
 
     public function edit(Supplier $supplier)
     {
+        if ($supplier->is_system) {
+            abort(404);
+        }
+
         return view('suppliers.edit', compact('supplier'));
     }
 
     public function update(Request $request, Supplier $supplier)
     {
+        if ($supplier->is_system) {
+            abort(404);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -64,17 +89,35 @@ class SupplierController extends Controller
 
         $supplier->update($validated);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully.');
+        return redirect()
+            ->route('suppliers.index')
+            ->with('success', 'Supplier updated successfully.');
     }
 
     public function destroy(Supplier $supplier)
     {
-        if ($supplier->products()->count() > 0) {
-            return redirect()->back()->with('error', 'Cannot delete this supplier because products are linked to it.');
+        if ($supplier->is_system) {
+            return redirect()
+                ->route('suppliers.index')
+                ->with('error', 'This supplier cannot be deleted.');
         }
 
-        $supplier->delete();
+        DB::transaction(function () use ($supplier) {
+            $unknownSupplier = Supplier::where('is_system', true)->firstOrFail();
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
+            Product::where('supplier_id', $supplier->id)
+                ->update([
+                    'supplier_id' => $unknownSupplier->id,
+                ]);
+
+            $supplier->delete();
+        });
+
+        return redirect()
+            ->route('suppliers.index')
+            ->with(
+                'success',
+                'Supplier deleted successfully. Linked products were reassigned to Unknown Supplier.'
+            );
     }
 }

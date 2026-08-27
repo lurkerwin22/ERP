@@ -14,8 +14,8 @@
         <x-panel>
             <form method="GET" action="{{ route('purchases.index') }}" class="flex flex-wrap gap-3 items-end">
                 <div>
-                    <x-forms.label name="supplier_id" label="Supplier" />
-                    <x-forms.select name="supplier_id">
+                    {{-- Pass the label attribute directly to x-forms.select --}}
+                    <x-forms.select name="supplier_id" label="Supplier">
                         <option value="">All Suppliers</option>
                         @foreach($suppliers as $supplier)
                             <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>

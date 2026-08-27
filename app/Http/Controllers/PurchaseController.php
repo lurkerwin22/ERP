@@ -94,7 +94,7 @@ class PurchaseController extends Controller
                 // Log Stock Movement if relation/table exists
                 if (method_exists($product, 'stockMovements')) {
                     $product->stockMovements()->create([
-                        'type' => 'PURCHASE',
+                        'type' => 'in',
                         'quantity' => $itemData['quantity'],
                         'notes' => "Purchase #{$purchase->id}",
                     ]);
