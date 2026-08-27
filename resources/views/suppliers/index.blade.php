@@ -2,11 +2,12 @@
     <div class="max-w-7xl mx-auto py-6 space-y-6">
         <div class="flex items-center justify-between">
             <x-page-heading>Suppliers</x-page-heading>
-            <a href="{{ route('suppliers.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors w-36 text-center">
+            
+            <!-- Removed w-36 and text-center, added whitespace-nowrap -->
+            <a href="{{ route('suppliers.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors whitespace-nowrap">
                 + Add Supplier
             </a>
         </div>
-
         @if(session('error'))
             <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                 {{ session('error') }}
