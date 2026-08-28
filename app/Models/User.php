@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\AiConversation;
 
 #[Fillable(['name', 'role', 'status', 'email', 'phone', 'profile_photo', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -25,6 +27,11 @@ class User extends Authenticatable
     public const ROLES = ['superadmin', 'manager', 'employee'];
 
     public const STATUSES = ['active', 'inactive'];
+
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(AiConversation::class);
+    }
 
     public function hasRole(string $role): bool
     {

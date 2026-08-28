@@ -110,8 +110,11 @@ Route::middleware(['auth'])->group(function () {
 
     // AI Assistant
     Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
-    Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
-    Route::post('/ai/clear', [AiAssistantController::class, 'clear'])->name('ai.clear');
+    Route::post('/ai-assistant/conversations', [AiAssistantController::class, 'store'])->name('ai.conversations.store');
+    Route::get('/ai-assistant/conversations/{conversation}', [AiAssistantController::class, 'show'])->name('ai.conversations.show');
+    Route::post('/ai-assistant/conversations/{conversation}/messages', [AiAssistantController::class, 'send'])->name('ai.conversations.messages.store');
+    Route::patch('/ai-assistant/conversations/{conversation}', [AiAssistantController::class, 'update'])->name('ai.conversations.update');
+    Route::delete('/ai-assistant/conversations/{conversation}', [AiAssistantController::class, 'destroy'])->name('ai.conversations.destroy');
 
     // Search API Route for New Sale Live Search
     Route::get('/api/products/search', [ProductController::class, 'search'])->name('products.search');
