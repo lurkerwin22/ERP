@@ -90,6 +90,7 @@
                         name="password"
                         type="password"
                         minlength="8"
+                        autocomplete="new-password"
                     />
 
                     <x-forms.input
@@ -97,6 +98,7 @@
                         name="password_confirmation"
                         type="password"
                         minlength="8"
+                        autocomplete="new-password"
                     />
                 </div>
 

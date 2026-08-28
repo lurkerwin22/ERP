@@ -20,9 +20,12 @@
         'id' => $name,
         'name' => $name,
         'class' => "{$baseClasses} {$stateClasses}",
-        'value' => old($name, $value),
         'required' => $required
     ];
+
+    if ($type !== 'password' && $required) {
+        $defaults['value'] = old($name, $value);
+    }
 @endphp
 
 <x-forms.field :$label :$name :$required>
