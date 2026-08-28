@@ -32,34 +32,34 @@
         @auth
             <div class="relative">
 
-                <!-- Profile Button -->
-                <button
-                    type="button"
-                    class="-m-1.5 flex items-center rounded-md p-1.5 focus:outline-none group"
-                    id="user-menu-button"
-                    aria-expanded="false"
-                    aria-haspopup="true"
+                <!-- Profile Link -->
+                <a
+                    href="{{ route('profile.edit') }}"
+                    class="-m-1.5 flex items-center rounded-md p-1.5 focus:outline-none group hover:bg-gray-50 transition-colors"
+                    aria-label="Go to profile settings"
                 >
-                    <span class="sr-only">Open user menu</span>
-
                     <!-- User Avatar -->
                     @if(auth()->user()->profile_photo)
-                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="{{ auth()->user()->name }}" class="h-8 w-8 rounded-full object-cover ring-2 ring-gray-200 group-hover:ring-indigo-500">
+                        <img
+                            src="{{ asset('storage/' . auth()->user()->profile_photo) }}"
+                            alt="{{ auth()->user()->name }}"
+                            class="h-8 w-8 rounded-full object-cover ring-2 ring-gray-200 group-hover:ring-indigo-500"
+                        >
                     @else
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600 ring-2 ring-gray-200 group-hover:ring-indigo-500">
+                        <div
+                            class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600 ring-2 ring-gray-200 group-hover:ring-indigo-500"
+                        >
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                     @endif
 
                     <!-- User Name -->
-                    <span class="hidden lg:flex lg:items-center ">
-                        <span class="ml-4 text-sm font-semibold leading-6 text-gray-900">
+                    <span class="hidden lg:flex lg:items-center">
+                        <span class="ml-4 text-sm font-semibold leading-6 text-gray-900 group-hover:text-indigo-600">
                             {{ auth()->user()->name }}
                         </span>
-
-                        
                     </span>
-                </button>
+                </a>
 
 
                 <!-- Dropdown -->
