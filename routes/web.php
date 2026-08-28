@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\Ai\AiAssistantController;
 use App\Http\Controllers\Api\ReportController;
@@ -91,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
     // Sales
-    Route::resource('sales', SaleController::class);
+    Route::resource('sales', SaleController::class)->only(['index', 'create', 'store', 'show']);
     Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancel');
     Route::get('/sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
     Route::get('/sales/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
@@ -101,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
     // Quotes
-    Route::resource('quotes', QuoteController::class);
+    Route::resource('quotes', QuoteController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/quotes/{quote}/convert', [QuoteController::class, 'convert'])->name('quotes.convert');
     Route::patch('/quotes/{quote}/status', [QuoteController::class, 'updateStatus'])->name('quotes.update-status');
 
@@ -126,5 +125,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Purchases
     Route::resource('purchases', PurchaseController::class)->except(['edit', 'update', 'destroy']);
+    Route::patch('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
 
 });

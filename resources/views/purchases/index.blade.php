@@ -63,7 +63,7 @@
                             <td class="p-4 font-medium">{{ $purchase->supplier->name ?? 'N/A' }}</td>
                             <td class="p-4 font-bold text-indigo-600">{{ number_format($purchase->total, 3) }} DT</td>
                             <td class="p-4">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase {{ $purchase->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700' }}">
                                     {{ $purchase->status }}
                                 </span>
                             </td>

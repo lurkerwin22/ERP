@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Sale extends Model
 {
     protected $fillable = [
+        'user_id',
         'customer_id',
         'customer_name',
         'customer_phone',
@@ -34,6 +35,11 @@ class Sale extends Model
     public function saleItems()
     {
         return $this->hasMany(SaleItem::class, 'sale_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function customer()
@@ -86,7 +92,7 @@ class Sale extends Model
      */
     public function getPaymentStatusAttribute()
     {
-        if ($this->status === 'canceled') {
+        if ($this->status === 'cancelled') {
             return null;
         }
 

@@ -97,6 +97,7 @@ class StockController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $product) {
+            $product = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
             $product->increment('stock', $request->quantity);
 
             StockMovement::create([
@@ -120,22 +121,26 @@ class StockController extends Controller
             'reason'   => 'nullable|string|max:255',
         ]);
 
-        if ($request->quantity > $product->stock) {
-            return redirect()->back()->withErrors([
-                'quantity' => 'Cannot remove more stock than available (' . $product->stock . ' available).'
-            ]);
+        try {
+            DB::transaction(function () use ($request, $product) {
+                $product = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+
+                if ($request->quantity > $product->stock) {
+                    throw new \RuntimeException('Cannot remove more stock than available (' . $product->stock . ' available).');
+                }
+
+                $product->decrement('stock', $request->quantity);
+
+                StockMovement::create([
+                    'product_id' => $product->id, // or 'product_id' depending on your migration column
+                    'type'       => 'out',
+                    'quantity'   => $request->quantity,
+                    'reason'     => $request->reason ?? 'Sale/Reduction',
+                ]);
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withErrors(['quantity' => $e->getMessage()]);
         }
-
-        DB::transaction(function () use ($request, $product) {
-            $product->decrement('stock', $request->quantity);
-
-            StockMovement::create([
-                'product_id' => $product->id, // or 'product_id' depending on your migration column
-                'type'       => 'out',
-                'quantity'   => $request->quantity,
-                'reason'     => $request->reason ?? 'Sale/Reduction',
-            ]);
-        });
 
         return redirect()->back()->with('success', 'Stock removed successfully.');
     }

@@ -39,8 +39,8 @@
                         />
                     </div>
 
-                    {{-- Role + Status: only for manager/employer --}}
-                    @if(in_array($user->role, ['manager', 'employer']))
+                    {{-- Role + Status: only for manager/employee --}}
+                    @if(in_array($user->role, ['manager', 'employee']))
 
                         <x-forms.select
                             label="Role"
@@ -48,7 +48,7 @@
                             required
                         >
                             @foreach(\App\Models\User::ROLES as $role)
-                                @if(in_array($role, ['manager', 'employer']))
+                                @if(in_array($role, ['manager', 'employee']))
                                     <option
                                         value="{{ $role }}"
                                         @selected($user->role === $role)

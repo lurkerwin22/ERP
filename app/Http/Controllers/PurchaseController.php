@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Purchase;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -73,15 +74,17 @@ class PurchaseController extends Controller
                 $lineTotal = $itemData['quantity'] * $itemData['unit_price'];
                 $grandTotal += $lineTotal;
 
+                // Lock the product so stock and purchase data stay consistent.
+                $product = Product::whereKey($itemData['product_id'])->lockForUpdate()->firstOrFail();
+
                 $purchase->items()->create([
-                    'product_id' => $itemData['product_id'],
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
                     'quantity' => $itemData['quantity'],
                     'unit_price' => $itemData['unit_price'],
                     'total' => $lineTotal,
                 ]);
 
-                // Update Product
-                $product = Product::findOrFail($itemData['product_id']);
 
                 // Increment stock directly
                 $product->increment('stock', $itemData['quantity']);
@@ -91,14 +94,13 @@ class PurchaseController extends Controller
                     'purchase_price' => $itemData['unit_price']
                 ]);
 
-                // Log Stock Movement if relation/table exists
-                if (method_exists($product, 'stockMovements')) {
-                    $product->stockMovements()->create([
-                        'type' => 'in',
-                        'quantity' => $itemData['quantity'],
-                        'notes' => "Purchase #{$purchase->id}",
-                    ]);
-                }
+                // Record the inventory change in the stock ledger.
+                StockMovement::create([
+                    'product_id' => $product->id,
+                    'type' => 'in',
+                    'quantity' => $itemData['quantity'],
+                    'reason' => "Purchase #{$purchase->id}",
+                ]);
             }
 
             // Update Header Total
@@ -106,6 +108,46 @@ class PurchaseController extends Controller
         });
 
         return redirect()->route('purchases.index')->with('success', 'Purchase recorded successfully and stock updated.');
+    }
+
+    public function cancel(Purchase $purchase)
+    {
+        if ($purchase->status === 'cancelled') {
+            return back()->with('error', 'This purchase is already cancelled.');
+        }
+
+        try {
+            DB::transaction(function () use ($purchase) {
+                $purchase = Purchase::whereKey($purchase->id)->lockForUpdate()->firstOrFail();
+                $purchase->load('items');
+
+                foreach ($purchase->items as $item) {
+                    $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
+                    if (!$product) {
+                        continue;
+                    }
+
+                    if ($product->stock < $item->quantity) {
+                        throw new \RuntimeException("Cannot cancel purchase #{$purchase->id}: '{$product->name}' only has {$product->stock} in stock, but {$item->quantity} would need to be removed.");
+                    }
+
+                    $product->decrement('stock', $item->quantity);
+
+                    StockMovement::create([
+                        'product_id' => $product->id,
+                        'type' => 'out',
+                        'quantity' => $item->quantity,
+                        'reason' => "Cancellation of Purchase #{$purchase->id}",
+                    ]);
+                }
+
+                $purchase->update(['status' => 'cancelled']);
+            });
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Unable to cancel the purchase: ' . $e->getMessage());
+        }
+
+        return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase cancelled and stock reversed successfully.');
     }
 
     public function show(Purchase $purchase)

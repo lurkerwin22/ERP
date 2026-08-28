@@ -6,9 +6,10 @@ use App\Models\Quote;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
-use App\Models\SaleItem;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class QuoteController extends Controller
 {
@@ -38,8 +39,7 @@ class QuoteController extends Controller
 
         DB::transaction(function () use ($validated, $request) {
             // Generate unique quote number (DEV-000001)
-            $nextId = (Quote::max('id') ?? 0) + 1;
-            $quoteNumber = 'DEV-' . str_pad($nextId, 6, '0', STR_PAD_LEFT);
+            $quoteNumber = 'TMP-' . Str::uuid();
 
             $total = 0;
             foreach ($validated['items'] as $item) {
@@ -55,9 +55,13 @@ class QuoteController extends Controller
                 'total' => $total,
             ]);
 
+            $quote->update(['quote_number' => 'DEV-' . str_pad($quote->id, 6, '0', STR_PAD_LEFT)]);
+
             foreach ($validated['items'] as $item) {
+                $product = Product::findOrFail($item['product_id']);
                 $quote->items()->create([
-                    'product_id' => $item['product_id'],
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'subtotal' => $item['quantity'] * $item['unit_price'],
@@ -76,8 +80,12 @@ class QuoteController extends Controller
 
     public function updateStatus(Request $request, Quote $quote)
     {
+        if ($quote->isConverted() || $quote->status === 'accepted') {
+            return back()->with('error', 'A converted quote cannot have its status changed.');
+        }
+
         $validated = $request->validate([
-            'status' => 'required|in:draft,sent,accepted,rejected',
+            'status' => 'required|in:draft,sent,rejected',
         ]);
 
         $quote->update(['status' => $validated['status']]);
@@ -87,62 +95,72 @@ class QuoteController extends Controller
 
     public function convert(Quote $quote)
     {
-        // 1. Prevent duplicate conversions
         if ($quote->isConverted() || $quote->status === 'accepted') {
             return back()->with('error', 'This quote has already been accepted and converted into a sale.');
         }
 
-        $quote->load(['items.product', 'customer']);
-
-        // 2. Stock Check
-        foreach ($quote->items as $item) {
-            $product = $item->product;
-            if ($product && $product->stock < $item->quantity) {
-                return back()->with('error', "Insufficient stock for '{$product->name}'. Available: {$product->stock}, Required: {$item->quantity}.");
-            }
-        }
+        $quote->load(['items', 'customer']);
 
         try {
             DB::transaction(function () use ($quote) {
-                // 3. Create Sale record
-                $sale = Sale::create([
-                    'customer_id'      => $quote->customer_id,
-                    'customer_name'    => optional($quote->customer)->name ?? 'Walk-in Customer',
-                    'customer_phone'   => optional($quote->customer)->phone,
-                    'customer_address' => optional($quote->customer)->address,
-                    'sale_date'        => now(),
-                    'total'            => $quote->total ?? $quote->items->sum(fn($i) => $i->quantity * $i->unit_price),
-                    'status'           => 'completed',
-                    'notes'            => 'Converted from Quote #' . ($quote->quote_number ?? $quote->id),
-                ]);
-
-                // 4. Create Sale Items & Deduct Product Stock
-                foreach ($quote->items as $item) {
-                    $sale->saleItems()->create([
-                        'product_id'   => $item->product_id,
-                        'product_name' => optional($item->product)->name ?? $item->product_name ?? 'Product',
-                        'quantity'     => $item->quantity,
-                        'unit_price'   => $item->unit_price,
-                        'subtotal'     => $item->quantity * $item->unit_price,
-                    ]);
-
-                    if ($item->product) {
-                        $item->product->decrement('stock', $item->quantity);
-                    }
+                $lockedQuote = Quote::whereKey($quote->id)->lockForUpdate()->firstOrFail();
+                if ($lockedQuote->sale_id || $lockedQuote->status === 'accepted') {
+                    throw new \RuntimeException('This quote has already been converted.');
                 }
 
-                // 5. Update Quote status to 'accepted' and attach sale_id
-                $quote->update([
-                    'status'  => 'accepted',
-                    'sale_id' => $sale->id,
+                $items = $lockedQuote->items()->get();
+                $products = [];
+                foreach ($items as $item) {
+                    $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
+                    if (!$product) {
+                        throw new \RuntimeException("Product for quote item #{$item->id} no longer exists.");
+                    }
+                    if ($product->stock < $item->quantity) {
+                        throw new \RuntimeException("Insufficient stock for '{$product->name}'. Available: {$product->stock}, Required: {$item->quantity}.");
+                    }
+                    $products[$item->id] = $product;
+                }
+
+                $customer = Customer::find($lockedQuote->customer_id);
+                $sale = Sale::create([
+                    'user_id' => auth()->id(),
+                    'customer_id' => $lockedQuote->customer_id,
+                    'customer_name' => optional($customer)->name ?? 'Walk-in Customer',
+                    'customer_phone' => optional($customer)->phone,
+                    'customer_address' => optional($customer)->address,
+                    'sale_date' => now(),
+                    'total' => $lockedQuote->total ?? $items->sum(fn ($i) => $i->quantity * $i->unit_price),
+                    'status' => 'completed',
+                    'notes' => 'Converted from Quote #' . ($lockedQuote->quote_number ?? $lockedQuote->id),
                 ]);
+
+                foreach ($items as $item) {
+                    $product = $products[$item->id];
+                    $product->decrement('stock', $item->quantity);
+
+                    $sale->saleItems()->create([
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $item->unit_price,
+                        'subtotal' => $item->quantity * $item->unit_price,
+                    ]);
+
+                    StockMovement::create([
+                        'product_id' => $product->id,
+                        'type' => 'out',
+                        'quantity' => $item->quantity,
+                        'reason' => "Sale #{$sale->id} (Quote #{$lockedQuote->quote_number})",
+                    ]);
+                }
+
+                $lockedQuote->update(['status' => 'accepted', 'sale_id' => $sale->id]);
             });
-
-            return redirect()->route('quotes.show', $quote->id)
-                ->with('success', 'Quote successfully converted to Sale! Stock levels updated.');
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return back()->with('error', 'Failed to convert quote: ' . $e->getMessage());
         }
+
+        return redirect()->route('quotes.show', $quote->id)->with('success', 'Quote successfully converted to Sale! Stock levels updated.');
     }
+
 }

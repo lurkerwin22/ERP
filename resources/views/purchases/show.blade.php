@@ -20,9 +20,16 @@
             </div>
             <div>
                 <span class="text-slate-400 block font-semibold">Status</span>
-                <span class="inline-block mt-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase">
+                <span class="inline-block mt-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase {{ $purchase->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700' }}">
                     {{ $purchase->status }}
                 </span>
+                @if($purchase->status !== 'cancelled')
+                    <form method="POST" action="{{ route('purchases.cancel', $purchase) }}" class="inline-block ml-2" onsubmit="return confirm('Cancel this purchase? Its quantities will be removed from stock.');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100">Cancel Purchase</button>
+                    </form>
+                @endif
             </div>
         </x-panel>
 
@@ -39,7 +46,7 @@
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @foreach($purchase->items as $item)
                         <tr>
-                            <td class="p-4 font-semibold">{{ $item->product->name }}</td>
+                            <td class="p-4 font-semibold">{{ $item->product->name ?? $item->product_name ?? 'Deleted Product' }}</td>
                             <td class="p-4 text-center">{{ $item->quantity }}</td>
                             <td class="p-4 text-right">{{ number_format($item->unit_price, 3) }} DT</td>
                             <td class="p-4 text-right font-bold">{{ number_format($item->total, 3) }} DT</td>
