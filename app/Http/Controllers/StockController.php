@@ -60,7 +60,7 @@ class StockController extends Controller
 
             case 'name':
             default:
-                $query->orderBy('name', $direction);
+                $query->orderByRaw("LOWER(name) {$direction}");
                 break;
         }
 
