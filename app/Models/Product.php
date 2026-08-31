@@ -14,8 +14,9 @@ class Product extends Model
         'name',
         'description',
         'price',
-        'purchase_price', // Added purchase_price
+        'purchase_price',
         'stock',
+        'unit',
         'alert_threshold',
         'category_id',
         'supplier_id',

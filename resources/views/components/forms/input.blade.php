@@ -23,7 +23,7 @@
         'required' => $required
     ];
 
-    if ($type !== 'password' && $required) {
+    if ($type !== 'password') {
         $defaults['value'] = old($name, $value);
     }
 @endphp

@@ -75,8 +75,67 @@
 
                 <!-- STOCK SECTION -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <x-forms.input label="Stock" name="stock" type="number" placeholder="0" :value="old('stock', 0)" />
-                    <x-forms.input label="Alert Threshold" name="alert_threshold" type="number" placeholder="5" :value="old('alert_threshold', 0)" />
+                    <x-forms.input
+                        label="Stock"
+                        name="stock"
+                        type="number"
+                        step="0.01"
+                        placeholder="0"
+                        :value="old('stock', 0)"
+                    />
+
+                    <div>
+                        <label for="unit" class="block text-sm font-medium text-gray-700 mb-1">
+                            Unit
+                        </label>
+
+                        <select
+                            id="unit"
+                            name="unit"
+                            class="block w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm"
+                        >
+                            <option value="piece" {{ old('unit', 'piece') === 'piece' ? 'selected' : '' }}>
+                                Piece
+                            </option>
+                            <option value="kg" {{ old('unit') === 'kg' ? 'selected' : '' }}>
+                                Kilogram (kg)
+                            </option>
+                            <option value="g" {{ old('unit') === 'g' ? 'selected' : '' }}>
+                                Gram (g)
+                            </option>
+                            <option value="l" {{ old('unit') === 'l' ? 'selected' : '' }}>
+                                Liter (l)
+                            </option>
+                            <option value="ml" {{ old('unit') === 'ml' ? 'selected' : '' }}>
+                                Milliliter (ml)
+                            </option>
+                            <option value="m" {{ old('unit') === 'm' ? 'selected' : '' }}>
+                                Meter (m)
+                            </option>
+                            <option value="cm" {{ old('unit') === 'cm' ? 'selected' : '' }}>
+                                Centimeter (cm)
+                            </option>
+                            <option value="box" {{ old('unit') === 'box' ? 'selected' : '' }}>
+                                Box
+                            </option>
+                            <option value="pack" {{ old('unit') === 'pack' ? 'selected' : '' }}>
+                                Pack
+                            </option>
+                        </select>
+
+                        @error('unit')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <x-forms.input
+                        label="Alert Threshold"
+                        name="alert_threshold"
+                        type="number"
+                        step="0.01"
+                        placeholder="5"
+                        :value="old('alert_threshold', 0)"
+                    />
                 </div>
 
                 <x-forms.divider />

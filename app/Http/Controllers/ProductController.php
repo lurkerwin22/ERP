@@ -56,16 +56,17 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'unit' => ['required', 'in:piece,kg,g,l,ml,m,cm,box,pack'],
             'purchase_price' => 'nullable|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'alert_threshold' => 'required|integer|min:0',
+            'stock' => 'required|numeric|min:0',
+            'alert_threshold' => 'required|numeric|min:0',
             'category_id' => 'nullable|exists:categories,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'image_file' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif|max:2048',
             'image_url' => 'nullable|url|max:1000',
         ]);
 
-        $data = $request->except(['image_file', 'image_url']);
+        $data = $validated;
 
         if ($request->hasFile('image_file')) {
             $data['image'] = $request->file('image_file')->store('products', 'public');
@@ -84,6 +85,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'unit' => ['required', 'in:piece,kg,g,l,ml,m,cm,box,pack'],
             'purchase_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'alert_threshold' => 'required|integer|min:0',
@@ -93,7 +95,7 @@ class ProductController extends Controller
             'image_url' => 'nullable|url|max:1000',
         ]);
 
-        $data = $request->except(['image_file', 'image_url']);
+        $data = $validated;
 
         if ($request->hasFile('image_file')) {
             if ($product->image && !filter_var($product->image, FILTER_VALIDATE_URL)) {
@@ -153,7 +155,7 @@ class ProductController extends Controller
                     $q->orWhere('sku', 'like', "%{$query}%");
                 }
             })
-            ->select(['id', 'name', 'price', 'stock'])
+            ->select(['id', 'name', 'price', 'stock', 'unit'])
             ->limit(10)
             ->get();
 
