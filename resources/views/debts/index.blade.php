@@ -74,8 +74,9 @@
                                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">UNPAID</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('sales.show', $sale) }}" class="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition">
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ route('sales.show', $sale) }}"
+                                    class="inline-flex items-center justify-center w-[124px] min-h-[52px] px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition">
                                         Collect Payment
                                     </a>
                                 </td>
