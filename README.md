@@ -2,7 +2,7 @@
 
 A full-featured, web-based ERP (Enterprise Resource Planning) application built with **Laravel** and **Tailwind CSS**, developed as part of a summer internship project at Anypli. The project covers the full lifecycle from *cahier des charges* (functional requirements, use cases, class diagrams) through to a working, professionalized ERP system.
 
-##diagram
+## Diagram
 
 <img width="7760" height="4123" alt="diagram" src="https://github.com/user-attachments/assets/9ea99580-d32d-4a58-a74e-81d3d163698d" />
 
